@@ -1,0 +1,82 @@
+.cell-container {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    height: 32px;
+    padding-top: 4px;
+    width: 100%;
+    border-right: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    background-color: var(--input-bg);
+    transition: background-color 0.2s;
+}
+
+.cell-container:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.cell-value {
+    font-family: var(--mono-font);
+    font-size: 0.9rem;
+    color: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cell-input {
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    border: none;
+    color: white;
+    /* Income in white */
+    font-family: var(--mono-font);
+    font-size: 0.9rem;
+    text-align: center;
+    outline: none;
+}
+
+.cell-input:focus {
+    background-color: rgba(0, 210, 255, 0.1);
+}
+
+.cell-input::placeholder {
+    color: rgba(255, 255, 255, 0.2);
+}
+
+/* Chrome, Safari, Edge, Opera */
+.cell-input::-webkit-outer-spin-button,
+.cell-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    appearance: none;
+    margin: 0;
+}
+
+/* Firefox */
+.cell-input[type=number] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+.expense-input {
+    color: var(--expense-color) !important;
+    /* Spending in soft red/coral */
+}
+
+.negative-cell {
+    background-color: var(--danger-color) !important;
+    color: white !important;
+}
+
+.negative-cell .cell-value,
+.negative-cell .cell-input {
+    color: white !important;
+    font-weight: bold !important;
+}
+
+.warning-cell .cell-value {
+    color: var(--warning-color);
+    /* Warning totals in yellow */
+    font-weight: bold;
+}

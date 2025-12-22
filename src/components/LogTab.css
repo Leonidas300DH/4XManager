@@ -1,0 +1,136 @@
+.log-tab-container {
+    padding: 20px;
+    height: 100%;
+    overflow-y: auto;
+    background: rgba(0, 5, 10, 0.4);
+    border-radius: 8px;
+}
+
+.log-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.log-turn-card {
+    background: rgba(10, 15, 25, 0.8);
+    border: 1px solid rgba(0, 240, 255, 0.2);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    transition: all 0.3s ease;
+}
+
+.log-turn-card:hover {
+    border-color: rgba(0, 240, 255, 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.6);
+}
+
+.log-turn-header {
+    background: linear-gradient(90deg, rgba(0, 240, 255, 0.1), transparent);
+    padding: 12px 20px;
+    border-bottom: 1px solid rgba(0, 240, 255, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.log-turn-number {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--accent-color);
+    letter-spacing: 2px;
+}
+
+.log-turn-status {
+    font-size: 11px;
+    font-family: 'Inter', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.log-status-warning {
+    color: #ff4444;
+}
+
+.log-status-ok {
+    color: #44ff44;
+    opacity: 0.7;
+}
+
+.log-turn-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    padding: 20px;
+}
+
+@media (max-width: 768px) {
+    .log-turn-body {
+        grid-template-columns: 1fr;
+    }
+}
+
+.log-events-section h4,
+.log-comment-section h4 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 12px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.5);
+    letter-spacing: 1px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 8px;
+}
+
+.log-events-list {
+    margin: 0;
+    padding-left: 18px;
+    color: #e0e0e0;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.log-events-list li {
+    margin-bottom: 8px;
+}
+
+.no-events {
+    font-style: italic;
+    color: rgba(255, 255, 255, 0.3);
+    font-size: 13px;
+}
+
+.log-comment-section {
+    display: flex;
+    flex-direction: column;
+}
+
+.log-comment-input {
+    flex: 1;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    padding: 12px;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    line-height: 1.5;
+    resize: vertical;
+    min-height: 100px;
+    transition: border-color 0.2s;
+}
+
+.log-comment-input:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    background: rgba(0, 0, 0, 0.4);
+}
+
+.log-comment-input::placeholder {
+    color: rgba(255, 255, 255, 0.2);
+}

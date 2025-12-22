@@ -1,0 +1,311 @@
+.dashboard-container.empire-report {
+    padding: 30px;
+    background: radial-gradient(circle at top right, rgba(0, 240, 255, 0.05), transparent),
+        rgba(0, 5, 15, 0.4);
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    height: 100%;
+    overflow-y: auto;
+}
+
+.report-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-bottom: 2px solid rgba(0, 240, 255, 0.3);
+    padding-bottom: 20px;
+}
+
+.report-title h2 {
+    margin: 0;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 28px;
+    color: #fff;
+    letter-spacing: 4px;
+    text-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+}
+
+.stardate {
+    font-size: 11px;
+    color: var(--accent-color);
+    letter-spacing: 2px;
+    opacity: 0.8;
+}
+
+.report-summary-counts {
+    display: flex;
+    gap: 30px;
+}
+
+.summary-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.summary-stat label {
+    font-size: 10px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.4);
+    letter-spacing: 1px;
+}
+
+.summary-stat span {
+    font-size: 20px;
+    font-family: 'Share Tech Mono', monospace;
+    color: #fff;
+}
+
+.summary-stat.warning span {
+    color: #ff4444;
+}
+
+.report-grid {
+    display: grid;
+    grid-template-columns: 1fr 450px;
+    gap: 30px;
+}
+
+@media (max-width: 1200px) {
+    .report-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.report-section {
+    background: rgba(15, 20, 35, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.report-section h3 {
+    margin: 0 0 20px 0;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: rgba(255, 255, 255, 0.6);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.report-section .icon {
+    font-size: 18px;
+}
+
+/* Common Table Styles */
+.report-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.report-table th {
+    text-align: left;
+    padding: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 11px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.report-table td {
+    padding: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Admiralty Table Custom */
+.fleet-table-wrapper {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.report-table.compact td,
+.report-table.compact th {
+    padding: 8px 10px;
+}
+
+.ship-main-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.ship-type {
+    font-weight: bold;
+    color: #e0e0e0;
+}
+
+.ship-acronym {
+    font-size: 10px;
+    color: var(--accent-color);
+    opacity: 0.7;
+}
+
+.ship-class {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.ship-stats {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.status-badge {
+    font-size: 9px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.status-badge.ready {
+    background: rgba(0, 255, 136, 0.1);
+    color: #00ff88;
+    border: 1px solid rgba(0, 255, 136, 0.2);
+}
+
+.status-badge.obsolete {
+    background: rgba(255, 68, 68, 0.1);
+    color: #ff4444;
+    border: 1px solid rgba(255, 68, 68, 0.2);
+    animation: pulse-danger 2s infinite;
+}
+
+@keyframes pulse-danger {
+    0% {
+        opacity: 0.7;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0.7;
+    }
+}
+
+.row-obsolete {
+    background: rgba(255, 0, 0, 0.03);
+}
+
+/* Registry Table */
+.planet-name {
+    font-weight: bold;
+    color: var(--accent-color);
+}
+
+.tag {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    text-transform: uppercase;
+}
+
+.tag.homeworld {
+    background: rgba(255, 215, 0, 0.15);
+    color: #ffd700;
+}
+
+.tag.colony {
+    background: rgba(0, 240, 255, 0.1);
+    color: var(--accent-color);
+}
+
+.cell-lp {
+    color: var(--lp-color);
+    width: 40px;
+    text-align: center;
+}
+
+.cell-cp {
+    color: var(--cp-color);
+    width: 40px;
+    text-align: center;
+}
+
+.cell-rp {
+    color: var(--rp-color);
+    width: 40px;
+    text-align: center;
+}
+
+.cell-tp {
+    color: var(--tp-color);
+    width: 40px;
+    text-align: center;
+}
+
+/* Side Column */
+.side-column {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+/* Tech Achievement */
+.tech-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.tech-badge {
+    padding: 2px 8px;
+    border-radius: 12px;
+    border: 1px solid;
+    font-weight: 500;
+    font-size: 0.8rem;
+    white-space: nowrap;
+}
+
+.tech-badge-attack {
+    border-color: #ff5252;
+    color: #ff5252;
+    background: rgba(255, 82, 82, 0.1);
+}
+
+.tech-badge-defense {
+    border-color: #448aff;
+    color: #448aff;
+    background: rgba(68, 138, 255, 0.1);
+}
+
+.tech-badge-move {
+    border-color: #4caf50;
+    color: #4caf50;
+    background: rgba(76, 175, 80, 0.1);
+}
+
+.tech-badge-tactics {
+    border-color: #ff9800;
+    color: #ff9800;
+    background: rgba(255, 152, 0, 0.1);
+}
+
+.tech-badge-special {
+    background: rgba(156, 39, 176, 0.15);
+    color: #e1bee7;
+    border: 1px solid rgba(156, 39, 176, 0.3);
+}
+
+.tech-badge.maxed {
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.15);
+    position: relative;
+    /* Optional: add a tiny gold border or glow if maxed */
+}
+
+.empty-msg {
+    font-size: 13px;
+    font-style: italic;
+    color: rgba(255, 255, 255, 0.2);
+    text-align: center;
+    padding: 20px;
+}

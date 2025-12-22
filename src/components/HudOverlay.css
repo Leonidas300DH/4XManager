@@ -1,0 +1,334 @@
+.ship-image-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.hud-overlay-container {
+    --primary: #00f0ff;
+    --primary-dim: rgba(0, 240, 255, 0.4);
+    --secondary: #0044ff;
+    --alert: #ff0055;
+    --warning: #ffb400;
+    --success: #00ff78;
+
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    pointer-events: none;
+    font-family: 'Share Tech Mono', monospace;
+    z-index: 100;
+}
+
+/* Glitch layer - displacement based, not color filters */
+.glitch-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: 0;
+    z-index: 2;
+    mix-blend-mode: hard-light;
+}
+
+.glitch-active {
+    opacity: 0.6;
+    animation: hud-glitch-displacement 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94) both infinite;
+}
+
+@keyframes hud-glitch-displacement {
+    0% {
+        transform: translate(0);
+    }
+
+    20% {
+        transform: translate(-4px, 2px);
+        filter: hue-rotate(90deg);
+    }
+
+    40% {
+        transform: translate(-2px, -2px);
+    }
+
+    60% {
+        transform: translate(2px, 2px);
+        filter: hue-rotate(-90deg);
+    }
+
+    80% {
+        transform: translate(2px, -2px);
+    }
+
+    100% {
+        transform: translate(0);
+    }
+}
+
+/* Chromatic aberration */
+.chromatic-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    z-index: 3;
+    opacity: 0;
+    mix-blend-mode: screen;
+}
+
+.chromatic-r {
+    transform: translate(-1px, 0);
+    filter: url(#redOnly);
+}
+
+.chromatic-b {
+    transform: translate(1px, 0);
+    filter: url(#blueOnly);
+}
+
+.hud-overlay-container.chromatic-active .chromatic-r,
+.hud-overlay-container.chromatic-active .chromatic-b {
+    opacity: 0.3;
+}
+
+/* Scanlines */
+.scanlines {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(to bottom,
+            transparent 0px,
+            transparent 2px,
+            rgba(0, 0, 0, 0.15) 2px,
+            rgba(0, 0, 0, 0.15) 4px);
+    z-index: 10;
+    opacity: 0.1;
+}
+
+/* Vignette */
+.vignette {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(ellipse at center,
+            transparent 40%,
+            rgba(0, 0, 0, 0.4) 100%);
+    z-index: 9;
+}
+
+/* Scan line */
+.scan-line {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent 5%, var(--primary) 50%, transparent 95%);
+    z-index: 11;
+    opacity: 0;
+    box-shadow: 0 0 8px var(--primary);
+}
+
+.scan-line.active {
+    opacity: 0.4;
+    animation: hud-scan-move 2.5s linear forwards;
+}
+
+@keyframes hud-scan-move {
+    0% {
+        top: 0;
+    }
+
+    100% {
+        top: 100%;
+    }
+}
+
+/* HUD Corners */
+.hud-corner {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-color: var(--primary);
+    border-style: solid;
+    z-index: 20;
+    opacity: 0.6;
+}
+
+.tl {
+    top: 10px;
+    left: 10px;
+    border-width: 1.5px 0 0 1.5px;
+}
+
+.tr {
+    top: 10px;
+    right: 10px;
+    border-width: 1.5px 1.5px 0 0;
+}
+
+.bl {
+    bottom: 10px;
+    left: 10px;
+    border-width: 0 0 1.5px 1.5px;
+}
+
+.br {
+    bottom: 10px;
+    right: 10px;
+    border-width: 0 1.5px 1.5px 0;
+}
+
+/* Status Panels */
+.status-panel,
+.data-panel,
+.tactical-log,
+.hex-display {
+    position: absolute;
+    z-index: 20;
+    color: var(--primary);
+    text-shadow: 0 0 3px rgba(0, 240, 255, 0.5);
+    font-size: 7px;
+    line-height: 1.4;
+}
+
+.status-panel {
+    top: 15px;
+    left: 15px;
+}
+
+.data-panel {
+    top: 15px;
+    right: 15px;
+    text-align: right;
+}
+
+.hex-display {
+    bottom: 15px;
+    left: 15px;
+    opacity: 0.4;
+    max-width: 80px;
+    word-break: break-all;
+}
+
+.tactical-log {
+    bottom: 15px;
+    right: 15px;
+    text-align: right;
+    width: 100px;
+    display: flex;
+    flex-direction: column-reverse;
+}
+
+.status-line {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.status-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--primary);
+}
+
+.status-dot.warning {
+    background: var(--warning);
+    animation: hud-pulse-dot 1s infinite;
+}
+
+@keyframes hud-pulse-dot {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.3;
+    }
+}
+
+.log-entry {
+    margin-bottom: 1px;
+    opacity: 0.8;
+}
+
+.log-entry.warning {
+    color: var(--warning);
+}
+
+.log-entry.alert {
+    color: var(--alert);
+}
+
+.log-entry.success {
+    color: var(--success);
+}
+
+/* Signal Bars */
+.signal-bars {
+    position: absolute;
+    bottom: 15px;
+    left: 100px;
+    display: flex;
+    gap: 1.5px;
+    align-items: flex-end;
+    z-index: 20;
+}
+
+.signal-bar {
+    width: 2px;
+    background: var(--primary);
+    opacity: 0.5;
+}
+
+/* Satellite Logs */
+.tactical-log.satellite {
+    width: auto;
+    max-width: 120px;
+    pointer-events: none;
+}
+
+/* Data Stream */
+.data-stream {
+    position: absolute;
+    font-size: 7px;
+    color: var(--primary);
+    opacity: 0;
+    z-index: 15;
+    text-shadow: 0 0 3px var(--primary);
+}
+
+.data-stream.active {
+    animation: hud-data-fade 6s ease-out forwards;
+}
+
+@keyframes hud-data-fade {
+    0% {
+        opacity: 0.6;
+        transform: translateY(0);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateY(-25px);
+    }
+}

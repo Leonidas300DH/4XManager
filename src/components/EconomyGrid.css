@@ -1,0 +1,374 @@
+.economy-grid-container {
+    height: 100%;
+    overflow: hidden;
+    background-color: var(--bg-color);
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+}
+
+.economy-table-container {
+    overflow: auto;
+    flex: 1;
+    position: relative;
+}
+
+.economy-table {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: max-content;
+    /* Force table to grow and trigger scroll */
+    /* Removed min-width: 100% to prevent unwanted expansion of columns */
+    /* table-layout: fixed;  <-- Optional: strictly enforce widths, but might need explicit widths on all cols */
+}
+
+.economy-table th,
+.economy-table td {
+    border-right: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    padding: 0;
+    height: 32px;
+    vertical-align: top;
+}
+
+/* Section Colors */
+.section-lp {
+    --section-color: var(--lp-color);
+    --section-rgb: var(--lp-rgb);
+}
+
+.section-cp {
+    --section-color: var(--cp-color);
+    --section-rgb: var(--cp-rgb);
+}
+
+.section-rp {
+    --section-color: var(--rp-color);
+    --section-rgb: var(--rp-rgb);
+}
+
+.section-tp {
+    --section-color: var(--tp-color);
+    --section-rgb: var(--tp-rgb);
+}
+
+tr[class*="section-"] .cell-value {
+    color: var(--section-color);
+}
+
+/* Section Dividers */
+.new-section td {
+    border-top: 3px solid rgba(var(--section-rgb), 0.6) !important;
+    padding-top: 4px;
+    background-color: rgba(var(--section-rgb), 0.05) !important;
+}
+
+/* Base separator for sections that are NOT new sections but still need color coding */
+tr[class*="section-"] .sticky-col {
+    border-left: 3px solid var(--section-color) !important;
+}
+
+.new-section .sticky-col {
+    border-top: 3px solid var(--section-color) !important;
+}
+
+/* Sticky Column (Labels) */
+.sticky-col {
+    position: sticky;
+    left: 0;
+    background-color: #152030;
+    /* Opaque background */
+    z-index: 30;
+    /* Increased z-index to stay above other content */
+    width: 250px;
+    min-width: 250px;
+    max-width: 250px;
+    /* Strictly enforce width */
+    border-right: 2px solid var(--border-color) !important;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
+    /* Shadow to show depth */
+}
+
+.grid-label {
+    display: flex;
+    align-items: flex-start;
+    padding: 8px 0 0 1rem;
+    height: 100%;
+    font-size: 0.85rem;
+    color: var(--text-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.header-label {
+    font-weight: bold;
+    background-color: #152030;
+    color: var(--accent-color);
+}
+
+/* Sticky Header (Turns) */
+.sticky-header {
+    position: sticky;
+    top: 0;
+    background-color: #152030;
+    /* Base opaque color */
+    z-index: 20;
+    height: 32px;
+    color: var(--accent-color);
+    font-weight: bold;
+    text-align: center;
+    min-width: 140px;
+    /* Increased by 75% */
+    width: 140px;
+}
+
+/* Top Left Corner */
+.top-left {
+    z-index: 40;
+    /* Highest z-index */
+    background-color: #152030;
+    border-right: 2px solid var(--border-color) !important;
+    position: sticky;
+    top: 0;
+    left: 0;
+    border-bottom: 3px solid rgba(0, 210, 255, 0.6) !important;
+}
+
+/* Cell Styles */
+.highlight-cell {
+    background-color: rgba(0, 210, 255, 0.1) !important;
+    font-weight: bold;
+}
+
+tr.section-lp .highlight-cell {
+    background-color: rgba(74, 222, 128, 0.15) !important;
+    color: var(--lp-color);
+}
+
+tr.section-cp .highlight-cell {
+    background-color: rgba(251, 191, 36, 0.15) !important;
+    color: var(--cp-color);
+}
+
+tr.section-rp .highlight-cell {
+    background-color: rgba(96, 165, 250, 0.15) !important;
+    color: var(--rp-color);
+}
+
+tr.section-tp .highlight-cell {
+    background-color: rgba(192, 132, 252, 0.15) !important;
+    color: var(--tp-color);
+}
+
+.subtotal-cell {
+    background-color: rgba(255, 255, 255, 0.03) !important;
+    font-weight: bold;
+    color: var(--section-color) !important;
+}
+
+.adjustment-row {
+    background-color: rgba(255, 255, 255, 0.03) !important;
+}
+
+.adjustment-row .sticky-col {
+    background-color: #1a2636 !important;
+}
+
+.current-turn-col {
+    background-color: rgba(0, 210, 255, 0.15) !important;
+    /* More visible highlight */
+    border-left: 1px solid rgba(0, 210, 255, 0.3);
+    border-right: 1px solid rgba(0, 210, 255, 0.3);
+}
+
+.current-turn-header {
+    /* Overlay highlight on top of opaque background */
+    background-image: linear-gradient(rgba(0, 210, 255, 0.3), rgba(0, 210, 255, 0.3));
+    background-color: #1a2a3a !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.7);
+    /* Shadow to separate header */
+    border-bottom: 3px solid var(--accent-color) !important;
+}
+
+.economy-table thead tr {
+    background-color: #152030;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.economy-table thead th {
+    border-bottom: 3px solid rgba(0, 210, 255, 0.6) !important;
+}
+
+.warning-cell {
+    color: var(--warning-color) !important;
+    background-color: rgba(255, 204, 0, 0.1) !important;
+}
+
+.highlight-cell,
+tr[class*="section-"] .highlight-cell {
+    background-color: rgba(var(--section-rgb), 0.15) !important;
+    color: white !important;
+    font-weight: bold !important;
+}
+
+.highlight-cell.negative-cell,
+tr[class*="section-"] .highlight-cell.negative-cell {
+    background-color: var(--danger-color) !important;
+    color: white !important;
+}
+
+/* Tech Display */
+.tech-display-row td {
+    height: auto !important;
+    min-height: 80px;
+}
+
+.tech-display-cell {
+    height: auto !important;
+    min-height: 80px;
+    padding: 8px;
+    overflow-y: auto;
+    align-items: flex-start;
+    justify-content: flex-start;
+}
+
+.tech-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    width: 100%;
+}
+
+.tech-tag {
+    background-color: rgba(96, 165, 250, 0.1);
+    border: 1px solid var(--rp-color);
+    border-radius: 4px;
+    padding: 4px 6px;
+    font-size: 0.75rem;
+    color: var(--text-color);
+    white-space: normal;
+    width: 100%;
+    text-align: left;
+}
+
+.section-cp .tech-tag {
+    background-color: rgba(251, 191, 36, 0.1);
+    border-color: var(--cp-color);
+}
+
+.empty-tech {
+    color: rgba(255, 255, 255, 0.2);
+    width: 100%;
+    text-align: center;
+    padding-top: 4px;
+}
+
+.warning-icon-small {
+    font-size: 0.8rem;
+    margin-left: 4px;
+    cursor: help;
+}
+
+/* Add Turn Button */
+.add-turn-th {
+    min-width: 60px;
+    vertical-align: middle;
+}
+
+.turn-controls {
+    display: flex;
+    gap: 5px;
+    justify-content: center;
+}
+
+.add-turn-button,
+.delete-turn-button {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid var(--accent-color);
+    background: rgba(0, 210, 255, 0.1);
+    color: var(--accent-color);
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    box-shadow: 0 0 10px rgba(0, 210, 255, 0.2);
+}
+
+.add-turn-button:hover {
+    background: var(--accent-color);
+    color: var(--bg-color);
+    transform: scale(1.1);
+    box-shadow: 0 0 15px rgba(0, 210, 255, 0.4);
+}
+
+.delete-turn-button {
+    border-color: #ff3333;
+    color: #ff3333;
+    background: rgba(255, 51, 51, 0.1);
+    box-shadow: 0 0 10px rgba(255, 51, 51, 0.2);
+}
+
+.delete-turn-button:hover {
+    background: #ff3333;
+    color: white;
+    transform: scale(1.1);
+    box-shadow: 0 0 15px rgba(255, 51, 51, 0.4);
+}
+
+.income-cell-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 4px;
+    height: auto !important;
+    min-height: 32px;
+}
+
+.contribution-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    justify-content: center;
+    margin-top: 2px;
+    width: 100%;
+}
+
+.contribution-badge {
+    font-size: 0.65rem;
+    padding: 1px 4px;
+    border-radius: 3px;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #aaa;
+    white-space: nowrap;
+}
+
+.contribution-badge.lp {
+    border-color: var(--lp-color);
+    color: var(--lp-color);
+    background-color: rgba(74, 222, 128, 0.05);
+}
+
+.contribution-badge.cp {
+    border-color: var(--cp-color);
+    color: var(--cp-color);
+    background-color: rgba(251, 191, 36, 0.05);
+}
+
+.contribution-badge.rp {
+    border-color: var(--rp-color);
+    color: var(--rp-color);
+    background-color: rgba(96, 165, 250, 0.05);
+}
+
+.contribution-badge.tp {
+    border-color: var(--tp-color);
+    color: var(--tp-color);
+    background-color: rgba(192, 132, 252, 0.05);
+}

@@ -1,0 +1,512 @@
+.planets-tab {
+    padding: 20px;
+    flex: 1;
+    overflow-y: auto;
+}
+
+
+.planets-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 20px;
+}
+
+.planet-card {
+    background: rgba(30, 35, 45, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 0;
+    position: relative;
+    transition: all 0.2s ease;
+    overflow: hidden;
+    height: fit-content;
+    width: 100%;
+}
+
+/* Add Colony Card */
+.add-planet-card {
+    background: rgba(30, 35, 45, 0.4);
+    border: 2px dashed rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 1 / 1;
+    width: 100%;
+    color: rgba(255, 255, 255, 0.4);
+    padding: 0;
+}
+
+.add-planet-card:hover {
+    background: rgba(30, 35, 45, 0.6);
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+    transform: translateY(-2px);
+}
+
+.add-planet-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.add-icon {
+    font-size: 3rem;
+    font-weight: 300;
+}
+
+.add-text {
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.planet-card.homeworld {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 15px rgba(0, 210, 255, 0.15);
+}
+
+.planet-illustration-container {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    position: relative;
+    overflow: hidden;
+}
+
+.planet-floating-header {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    /* Align to top to stack badges correctly */
+    pointer-events: none;
+    z-index: 2;
+}
+
+.planet-header-left {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-width: 70%;
+    pointer-events: auto;
+}
+
+.planet-name-badge {
+    background: rgba(0, 0, 0, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    font-size: 1rem;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 8px;
+    width: 100%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    transition: all 0.2s ease;
+}
+
+.planet-production-badge {
+    background: rgba(0, 0, 0, 1);
+    border: 1px solid rgba(var(--accent-rgb), 0.3);
+    color: var(--accent-color);
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 6px;
+    width: fit-content;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+    letter-spacing: 0.02em;
+}
+
+.planet-name-badge:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    background: #000;
+    box-shadow: 0 0 0 2px rgba(0, 210, 255, 0.3);
+}
+
+.planet-header-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    pointer-events: auto;
+}
+
+.planet-actions-top-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.planet-type-badge {
+    font-size: 0.75rem;
+    padding: 6px 10px;
+    border-radius: 6px;
+    background: var(--accent-color);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: black;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.remove-colony-badge-btn {
+    background: rgba(220, 53, 69, 0.2);
+    border: 1px solid rgba(220, 53, 69, 0.4);
+    color: #ff4d4d;
+    cursor: pointer;
+    width: 28px;
+    height: 28px;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    transition: all 0.2s;
+    line-height: 1;
+    backdrop-filter: blur(4px);
+}
+
+.remove-colony-badge-btn:hover {
+    background: var(--danger-color);
+    color: white;
+    border-color: var(--danger-color);
+    transform: scale(1.1);
+}
+
+.conquer-colony-btn {
+    background: var(--danger-color);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    cursor: pointer;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: all 0.2s;
+    box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+    width: 100%;
+    text-align: center;
+}
+
+.conquer-colony-btn:hover {
+    background: #ff4d4d;
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(220, 53, 69, 0.5);
+}
+
+.remove-colony-badge-btn:hover {
+    background: var(--danger-color);
+    color: white;
+    border-color: var(--danger-color);
+    transform: scale(1.1);
+}
+
+/* Homeworld/Colony Badge Colors are now uniform blue by default */
+.homeworld .planet-type-badge {
+    background: var(--accent-color);
+    color: black;
+    box-shadow: 0 0 12px rgba(0, 210, 255, 0.4);
+}
+
+.planet-floating-footer {
+    position: absolute;
+    bottom: 15px;
+    left: 10px;
+    right: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.planet-footer-left,
+.planet-footer-right {
+    pointer-events: auto;
+}
+
+.cp-buttons-mini {
+    display: flex;
+    gap: 4px;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(8px);
+    padding: 4px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    pointer-events: auto;
+}
+
+.cp-btn-mini {
+    background: transparent;
+    border: 1px solid transparent;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 700;
+    transition: all 0.2s;
+    min-width: 32px;
+}
+
+.cp-btn-mini:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.cp-btn-mini.active {
+    background: var(--accent-color);
+    color: black;
+    box-shadow: 0 0 10px rgba(0, 210, 255, 0.4);
+}
+
+/* Badges Container */
+.facility-badges-container {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: flex-end;
+}
+
+/* Active Facility Badge */
+.facility-active-badge {
+    padding: 4px 12px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: black;
+    text-shadow: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    width: 100%;
+    min-width: 160px;
+}
+
+.facility-active-badge:hover {
+    background: #ef4444 !important;
+    /* Danger red */
+    color: white !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+}
+
+.facility-active-badge.ic {
+    background: #fbbf24;
+}
+
+.facility-active-badge.lc {
+    background: #4ade80;
+}
+
+.facility-active-badge.rc {
+    background: #60a5fa;
+}
+
+.facility-active-badge.tc {
+    background: #c084fc;
+}
+
+
+
+
+.facilities-slots {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.facility-slot {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px dashed rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.facility-slot.occupied {
+    border-style: solid;
+    border-color: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.facility-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.facility-type {
+    font-weight: bold;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+}
+
+.facility-type.ic,
+.build-fac-btn.ic {
+    color: #fbbf24;
+}
+
+.facility-type.lc,
+.build-fac-btn.lc {
+    color: #4ade80;
+}
+
+.facility-type.rc,
+.build-fac-btn.rc {
+    color: #60a5fa;
+}
+
+.facility-type.tc,
+.build-fac-btn.tc {
+    color: #c084fc;
+}
+
+/* Build Buttons Group */
+.facility-build-btns {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    background: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(12px);
+    padding: 4px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    width: 100%;
+}
+
+.build-fac-btn {
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid currentColor;
+    padding: 4px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 800;
+    transition: all 0.2s;
+    width: 100%;
+    min-width: 160px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    line-height: 1.1;
+}
+
+.build-fac-btn:hover {
+    transform: scale(1.05);
+    filter: brightness(1.15);
+    z-index: 2;
+}
+
+/* Under Construction Badge */
+.facility-under-construction {
+    background: rgba(0, 0, 0, 0.85);
+    border: 1px solid currentColor;
+    border-radius: 6px;
+    padding: 4px 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    line-height: 1.1;
+    transition: all 0.2s;
+    width: 100%;
+    min-width: 160px;
+}
+
+.facility-under-construction:hover {
+    background: rgba(220, 53, 69, 0.2);
+    border-color: var(--danger-color);
+    color: var(--danger-color) !important;
+}
+
+.facility-under-construction.ic {
+    color: #fbbf24;
+}
+
+.facility-under-construction.lc {
+    color: #4ade80;
+}
+
+.facility-under-construction.rc {
+    color: #60a5fa;
+}
+
+.facility-under-construction.tc {
+    color: #c084fc;
+}
+
+.fac-name {
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.fac-status {
+    font-size: 0.6rem;
+    font-weight: 600;
+    opacity: 0.7;
+    text-transform: capitalize;
+}
+
+
+.planet-illustration-placeholder {
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.square-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.facility-illustration-placeholder {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+}
+
+.square-placeholder-mini {
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.planet-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
