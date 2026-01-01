@@ -54,18 +54,21 @@ const DashboardTab: React.FC<DashboardTabProps> = ({ turns }) => {
             const currentAttack = parseInt(g.techs?.attack || '0');
             const currentDefense = parseInt(g.techs?.defense || '0');
             const currentMove = parseInt(g.techs?.move || '1');
+            const currentTactics = parseInt(g.techs?.tactics || '0');
 
             // Find best available for this category
             const bestAttack = getTechLevel('Attack');
             const bestDefense = getTechLevel('Defense');
             const bestMove = Math.max(1, getTechLevel('Movement'));
+            const bestTactics = getTechLevel('Tactics');
 
             // Check if ship can hold more
             const canHoldAttack = currentAttack < Math.min(bestAttack, shipDef.maxAttack ?? shipDef.hullSize ?? 1);
             const canHoldDefense = currentDefense < Math.min(bestDefense, shipDef.maxDefense ?? shipDef.hullSize ?? 1);
             const canHoldMove = currentMove < bestMove;
+            const canHoldTactics = currentTactics < bestTactics;
 
-            const isObsolete = (canHoldAttack || canHoldDefense || canHoldMove) && shipDef.category !== 'Construction';
+            const isObsolete = (canHoldAttack || canHoldDefense || canHoldMove || canHoldTactics) && shipDef.category !== 'Construction';
 
             return {
                 name: shipDef.type,

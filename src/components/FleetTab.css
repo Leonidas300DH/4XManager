@@ -551,7 +551,7 @@
     border-color: rgba(68, 255, 68, 0.4);
 }
 
-.status-badge.upgrade {
+.status-badge.obsolete {
     background: rgba(255, 68, 68, 0.1);
     color: #ff4444 !important;
     border-color: rgba(255, 68, 68, 0.6) !important;

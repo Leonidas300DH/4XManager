@@ -87,16 +87,15 @@ export const FleetTab: React.FC<FleetTabProps> = ({ currentTurn, onUpdate, turnI
 
     const handleGroupUpdate = (acronym: string, groupId: number, field: keyof ShipGroupData | 'techs', value: any, techType?: string) => {
         const newFleet = { ...currentTurn.fleet };
-        if (!newFleet[acronym]) {
-            newFleet[acronym] = { groups: [], notes: '' };
-        }
+        if (!newFleet[acronym]) newFleet[acronym] = { groups: [], notes: '' };
 
-        let groupIndex = newFleet[acronym].groups.findIndex(g => g.id === groupId);
+        const groups = [...(newFleet[acronym].groups || [])];
+        let groupIndex = groups.findIndex(g => g.id === groupId);
         let group: ShipGroupData;
 
         if (groupIndex === -1) {
-            // Initialize group
-            let initialTechs = { attack: "0", defense: "0", move: "1" };
+            // Initialization Logic for new groups
+            let initialTechs = { attack: "0", defense: "0", move: "1", tactics: "0" };
             let initialExp: ExperienceLevel | undefined = undefined;
 
             if (field === 'count' && value > 0) {
@@ -106,6 +105,7 @@ export const FleetTab: React.FC<FleetTabProps> = ({ currentTurn, onUpdate, turnI
 
                 const bestAttack = Math.max(...availableAttackLevels.filter(l => l <= maxAttack));
                 const bestDefense = Math.max(...availableDefenseLevels.filter(l => l <= maxDefense));
+                const bestTactics = Math.max(...availableTacticsLevels);
 
                 let bestMove = 1;
                 if (ship && ship.moveType !== 'none' && ship.moveType !== 'fixed-1') {
@@ -116,7 +116,8 @@ export const FleetTab: React.FC<FleetTabProps> = ({ currentTurn, onUpdate, turnI
                 initialTechs = {
                     attack: bestAttack.toString(),
                     defense: bestDefense.toString(),
-                    move: bestMove.toString()
+                    move: bestMove.toString(),
+                    tactics: ship?.category === 'Spaceship' ? bestTactics.toString() : "0"
                 };
             }
 
@@ -130,10 +131,10 @@ export const FleetTab: React.FC<FleetTabProps> = ({ currentTurn, onUpdate, turnI
                 techs: initialTechs,
                 experience: initialExp
             };
-            newFleet[acronym].groups = [...newFleet[acronym].groups, group];
-            groupIndex = newFleet[acronym].groups.length - 1;
+            groups.push(group);
+            groupIndex = groups.length - 1;
         } else {
-            group = { ...newFleet[acronym].groups[groupIndex] };
+            group = { ...groups[groupIndex] };
         }
 
         if (field === 'purchase' || field === 'adjust') {
@@ -158,11 +159,10 @@ export const FleetTab: React.FC<FleetTabProps> = ({ currentTurn, onUpdate, turnI
                 group.adjust = validAdjust;
             }
 
-            // Sync Tech Logic: (prevCount === 0 || (prevCount + adjustment === 0)) && totalCount > 0
+            // Sync Tech Logic: (prevCount === 0) && totalCount > 0
             const purchase = group.purchase || 0;
             const adjust = group.adjust || 0;
-            const totalCount = prevCount + purchase + adjust;
-            const isNewGroup = (prevCount === 0 || (prevCount + adjust === 0)) && totalCount > 0;
+            const isNewGroup = prevCount === 0 && (purchase + adjust) > 0;
 
             if (isNewGroup && ship) {
                 // Best available techs for category
@@ -186,7 +186,7 @@ export const FleetTab: React.FC<FleetTabProps> = ({ currentTurn, onUpdate, turnI
                     if (name === 'Shipyard' && max === 0) max = 1;
 
                     if (max > 0) {
-                        if (name !== 'Military Academy' && name !== 'Tactics') {
+                        if (name !== 'Military Academy' && (name !== 'Tactics' || cat === 'Spaceship')) {
                             relevantTechs.push(`${name} ${max}`);
                         }
 
@@ -199,6 +199,8 @@ export const FleetTab: React.FC<FleetTabProps> = ({ currentTurn, onUpdate, turnI
                             newGroupTechs.defense = Math.min(max, shipMaxDefense).toString();
                         } else if (name === 'Movement' && !isGroundUnit) {
                             newGroupTechs.move = max.toString();
+                        } else if (name === 'Tactics' && cat === 'Spaceship') {
+                            newGroupTechs.tactics = max.toString();
                         }
                     }
                 });
@@ -221,11 +223,10 @@ export const FleetTab: React.FC<FleetTabProps> = ({ currentTurn, onUpdate, turnI
         if (group.isUpgraded === undefined) group.isUpgraded = false;
 
         // Update the array with the modified group clone
-        const finalGroups = [...newFleet[acronym].groups];
-        finalGroups[groupIndex] = group;
+        groups[groupIndex] = group;
         newFleet[acronym] = {
             ...newFleet[acronym],
-            groups: finalGroups
+            groups: groups
         };
 
         onUpdate(turnIndex, 'fleet', acronym, newFleet[acronym]);
@@ -635,6 +636,7 @@ export const FleetTab: React.FC<FleetTabProps> = ({ currentTurn, onUpdate, turnI
                                 let attack = 0;
                                 let defense = 0;
                                 let move = 1;
+                                let tactics = 0;
 
                                 techList.forEach(name => {
                                     const levels = getAvailableLevels(name);
@@ -646,16 +648,17 @@ export const FleetTab: React.FC<FleetTabProps> = ({ currentTurn, onUpdate, turnI
 
                                     if (max > 0) {
                                         // Military Academy and Tactics are global/automatic, exclude from unit badges
-                                        if (name !== 'Military Academy' && name !== 'Tactics') {
+                                        if (name !== 'Military Academy' && (name !== 'Tactics' || cat === 'Spaceship')) {
                                             list.push(`${name} ${max}`);
                                         }
                                         if (name === 'Attack') attack = max;
                                         if (name === 'Defense') defense = max;
                                         if (name === 'Movement') move = max;
+                                        if (name === 'Tactics' && cat === 'Spaceship') tactics = max;
                                     }
                                 });
 
-                                return { list, attack, defense, move };
+                                return { list, attack, defense, move, tactics };
                             };
 
                             const renderTable = () => (
@@ -689,26 +692,29 @@ export const FleetTab: React.FC<FleetTabProps> = ({ currentTurn, onUpdate, turnI
                                             const prevCountValue = group.count || 0;
                                             const totalCount = prevCountValue + purchaseValue + adjustValue;
 
-                                            // Logic: (prevCount === 0 || (prevCount + adjustment === 0)) && totalCount > 0
-                                            const isNewGroup = (prevCountValue === 0 || (prevCountValue + adjustValue === 0)) && totalCount > 0;
+                                            // Logic: prevCount === 0 && (purchase + adjust) > 0
+                                            const isNewGroup = prevCountValue === 0 && (purchaseValue + adjustValue) > 0;
                                             const bestGlobal = getGlobalBestForCategory(ship?.category || 'Spaceship');
 
                                             // Override logic for Upgrades: If upgraded, use bestGlobal values
                                             // Constructions are always treated as upgraded (max available tech)
-                                            const isConstruction = ship?.category === 'Construction';
-                                            const useUpgraded = group.isUpgraded || isConstruction;
+                                            const isConstruct = ship?.category === 'Construction';
+                                            const useUpgraded = group.isUpgraded || isConstruct;
 
                                             const displayTechList = ((isNewGroup || useUpgraded) ? bestGlobal.list : (group.techLevel || []))
-                                                .filter(t => !t.startsWith('Military Academy') && !t.startsWith('Tactics') && !t.startsWith('Security Forces'));
+                                                .filter(t => !t.startsWith('Military Academy') && !t.startsWith('Security Forces'));
 
                                             const attackVal = (isNewGroup || useUpgraded) ? Math.min(bestGlobal.attack, ship.maxAttack ?? ship.hullSize ?? 1) : parseInt(group.techs.attack || "0");
                                             const defenseVal = (isNewGroup || useUpgraded) ? Math.min(bestGlobal.defense, ship.maxDefense ?? ship.hullSize ?? 1) : parseInt(group.techs.defense || "0");
                                             const moveVal = (isNewGroup || useUpgraded) ? bestGlobal.move : parseInt(group.techs.move || "1");
+                                            const tacticsVal = (isNewGroup || useUpgraded) ? bestGlobal.tactics : parseInt(group.techs.tactics || "0");
 
                                             // Check if already maxed out
-                                            const currentTechsSorted = [...(group.techLevel || [])].sort();
-                                            const bestTechsSorted = [...(bestGlobal.list)].sort();
-                                            const isAlreadyMaxed = JSON.stringify(currentTechsSorted) === JSON.stringify(bestTechsSorted);
+                                            const isAlreadyMaxed =
+                                                attackVal >= Math.min(bestGlobal.attack, ship.maxAttack ?? ship.hullSize ?? 1) &&
+                                                defenseVal >= Math.min(bestGlobal.defense, ship.maxDefense ?? ship.hullSize ?? 1) &&
+                                                moveVal >= bestGlobal.move &&
+                                                (ship.category !== 'Spaceship' || tacticsVal >= bestGlobal.tactics);
 
                                             const academyLevel = Math.max(...getAvailableLevels('Military Academy'));
                                             const effectiveExp = group.experience || (academyLevel > 0 ? 'Skilled' : 'Green');
@@ -808,11 +814,11 @@ export const FleetTab: React.FC<FleetTabProps> = ({ currentTurn, onUpdate, turnI
                                                                     <span className="status-badge ready">Ready</span>
                                                                 ) : (
                                                                     <button
-                                                                        className="status-badge upgrade"
+                                                                        className="status-badge obsolete"
                                                                         onClick={() => !readOnly && handleGroupUpdate(ship.acronym, groupId, 'isUpgraded', true)}
                                                                         title="Tech Upgrade Available"
                                                                     >
-                                                                        Upgrade
+                                                                        Obsolete
                                                                     </button>
                                                                 )
                                                             ) : null}

@@ -41,6 +41,7 @@ export function calculateTurns(turns: TurnData[]): TurnData[] {
             let attack = 0;
             let defense = 0;
             let move = 1;
+            let tactics = 0;
 
             techList.forEach(name => {
                 const levels = getAvailableLevels(name);
@@ -52,17 +53,21 @@ export function calculateTurns(turns: TurnData[]): TurnData[] {
 
                 if (max > 0) {
                     // Military Academy and Tactics are global/automatic, exclude from unit badges
-                    if (name !== 'Military Academy' && name !== 'Tactics') {
+                    if (name !== 'Military Academy' && (name !== 'Tactics' || cat === 'Spaceship')) {
                         list.push(`${name} ${max}`);
                     }
                     if (name === 'Attack') attack = max;
                     if (name === 'Defense') defense = max;
                     if (name === 'Movement') move = max;
+                    if (name === 'Tactics' && cat === 'Spaceship') tactics = max;
                 }
             });
 
-            return { list, attack, defense, move };
+            return { list, attack, defense, move, tactics };
         };
+
+        // Helper to ensure numeric values from potentially string-y input data
+        const val = (v: any) => Number(v || 0);
 
         // --- Fleet Propagation ---
         // We do this EARLY so that counts from previous turn are available for CP calculations (upgrades)
@@ -83,33 +88,35 @@ export function calculateTurns(turns: TurnData[]): TurnData[] {
                 const bestAvailable = getGlobalBestForCategory(ship?.category || 'Spaceship');
 
                 prevGroups.forEach(prevGroup => {
-                    const prevTotal = (prevGroup.count || 0) + (prevGroup.purchase || 0) + (prevGroup.adjust || 0);
+                    const prevTotal = val(prevGroup.count) + val(prevGroup.purchase) + val(prevGroup.adjust);
                     let groupInCurrent = currentGroups.find(g => g.id === prevGroup.id);
 
                     // --- Preparation of inherited values ---
                     const inheritedCount = acronym === 'Militia' ? 0 : prevTotal;
-                    let inheritedTechLevel = prevGroup.techLevel || [];
+                    let inheritedTechLevel = [...(prevGroup.techLevel || [])];
                     let inheritedTechs = { ...(prevGroup.techs || {}) };
                     let inheritedExperience: ExperienceLevel | undefined = prevGroup.experience || 'Green';
 
                     // --- Experience Logic ---
                     // If there is a purchase in the CURRENT turn for this group, reset its experience to baseline
-                    const hasPurchase = (groupInCurrent?.purchase || 0) > 0;
+                    const hasPurchase = val(groupInCurrent?.purchase) > 0;
                     if (hasPurchase) {
                         inheritedExperience = undefined;
                     } else if ((prevGroup.experience === 'Green' || !prevGroup.experience) && prevTotal > 0 && acronym !== 'Militia') {
                         inheritedExperience = 'Skilled';
                     }
 
-                    // Apply Upgrade if it was marked in previous turn
-                    // This means the "current" turn starts with the new techs
-                    // OR if it's a Construction (always at max tech for free)
-                    const isConstruction = ship?.category === 'Construction';
-                    if ((prevGroup.isUpgraded || isConstruction) && ship) {
-                        inheritedTechLevel = bestAvailable.list;
+                    // Apply Upgrade if it was marked in previous turn (baked into this turn's start)
+                    // Construction ships are ALWAYS at max tech for free
+                    const isConstruct = ship?.category === 'Construction';
+                    if ((prevGroup.isUpgraded || isConstruct) && ship) {
+                        inheritedTechLevel = [...bestAvailable.list];
                         inheritedTechs.attack = Math.min(bestAvailable.attack, ship.maxAttack ?? ship.hullSize ?? 1).toString();
                         inheritedTechs.defense = Math.min(bestAvailable.defense, ship.maxDefense ?? ship.hullSize ?? 1).toString();
                         inheritedTechs.move = bestAvailable.move.toString();
+                        if (ship.category === 'Spaceship') {
+                            inheritedTechs.tactics = bestAvailable.tactics.toString();
+                        }
                     }
 
                     if (groupInCurrent) {
@@ -124,17 +131,21 @@ export function calculateTurns(turns: TurnData[]): TurnData[] {
                         }
 
                         // --- Immediate Tech Sync Rule ---
-                        const isNewGroup = (inheritedCount === 0 || (inheritedCount + (groupInCurrent.adjust || 0) === 0)) && (inheritedCount + (groupInCurrent.purchase || 0) + (groupInCurrent.adjust || 0)) > 0;
-                        const hasCurrentPurchase = (groupInCurrent.purchase || 0) > 0;
-                        const isConstruction = ship?.category === 'Construction';
+                        // Only sync if:
+                        // 1. Explicitly marked for upgrade in CURRENT turn (via Obsolete button)
+                        // 2. Genuinely new group (not inherited from previous turn)
+                        // 3. Construction ship (always max tech)
+                        const isNewGrp = inheritedCount === 0 && (val(groupInCurrent.purchase) + val(groupInCurrent.adjust)) > 0;
 
-                        if ((groupInCurrent.isUpgraded || isNewGroup || hasCurrentPurchase || isConstruction) && ship && acronym !== 'Militia') {
+                        if ((groupInCurrent.isUpgraded || isNewGrp || isConstruct) && ship && acronym !== 'Militia') {
                             groupInCurrent.techLevel = [...bestAvailable.list];
                             groupInCurrent.techs = {
                                 attack: Math.min(bestAvailable.attack, ship.maxAttack ?? ship.hullSize ?? 1).toString(),
                                 defense: Math.min(bestAvailable.defense, ship.maxDefense ?? ship.hullSize ?? 1).toString(),
-                                move: bestAvailable.move.toString()
+                                move: bestAvailable.move.toString(),
+                                tactics: ship.category === 'Spaceship' ? bestAvailable.tactics.toString() : (groupInCurrent.techs.tactics || "0")
                             };
+                            // Flag is NOT consumed here anymore, to allow CP calculations later in the turn
                         } else {
                             // Inherit
                             groupInCurrent.techLevel = [...inheritedTechLevel];
@@ -144,8 +155,6 @@ export function calculateTurns(turns: TurnData[]): TurnData[] {
                         // Reset isUpgraded only if it was just "baked in" from a previous turn's upgrade
                         if (prevGroup.isUpgraded) {
                             groupInCurrent.isUpgraded = false;
-                        } else {
-                            groupInCurrent.isUpgraded = !!groupInCurrent.isUpgraded;
                         }
 
                         // Default current turn fields
@@ -168,6 +177,7 @@ export function calculateTurns(turns: TurnData[]): TurnData[] {
 
                 currentTurn.fleet[acronym].groups = currentGroups;
             });
+
         } else {
             // --- First Turn Initialization ---
             Object.keys(currentTurn.fleet).forEach(acronym => {
@@ -176,38 +186,34 @@ export function calculateTurns(turns: TurnData[]): TurnData[] {
                 const bestAvailable = getGlobalBestForCategory(ship?.category || 'Spaceship');
 
                 groupData.groups.forEach(group => {
-                    const total = (group.count || 0) + (group.purchase || 0) + (group.adjust || 0);
-                    const hasCurrentPurchase = (group.purchase || 0) > 0;
-                    const isNewGroup = total > 0 && (group.count || 0) === 0;
-                    const isConstruction = ship?.category === 'Construction';
+                    const total = val(group.count) + val(group.purchase) + val(group.adjust);
+                    const isNewGrp = total > 0 && val(group.count) === 0;
+                    const isConstruct = ship?.category === 'Construction';
 
-                    if ((group.isUpgraded || isNewGroup || hasCurrentPurchase || isConstruction) && ship && acronym !== 'Militia') {
+                    // On Turn 1, only sync if it's an explicit upgrade, a new build, or a construction
+                    // Pre-existing fleets (count > 0) stay at their initial techs
+                    if ((group.isUpgraded || isNewGrp || isConstruct) && ship && acronym !== 'Militia') {
                         group.techLevel = [...bestAvailable.list];
                         group.techs = {
                             attack: Math.min(bestAvailable.attack, ship.maxAttack ?? ship.hullSize ?? 1).toString(),
                             defense: Math.min(bestAvailable.defense, ship.maxDefense ?? ship.hullSize ?? 1).toString(),
-                            move: bestAvailable.move.toString()
+                            move: bestAvailable.move.toString(),
+                            tactics: ship.category === 'Spaceship' ? bestAvailable.tactics.toString() : (group.techs.tactics || "0")
                         };
-                    } else if (total > 0 && (!group.techLevel || group.techLevel.length === 0)) {
-                        // Default for Turn 1 if not explicitly new/purchased/upgraded but needs init
-                        group.techLevel = [...bestAvailable.list];
-                        group.techs = {
-                            attack: Math.min(bestAvailable.attack, ship?.maxAttack ?? ship?.hullSize ?? 1).toString(),
-                            defense: Math.min(bestAvailable.defense, ship?.maxDefense ?? ship?.hullSize ?? 1).toString(),
-                            move: bestAvailable.move.toString()
-                        };
+                        // Flag is NOT consumed here
                     }
 
                     // Reset experience on Turn 1 if it's a purchase
-                    if (hasCurrentPurchase) {
+                    if (val(group.purchase) > 0) {
                         group.experience = undefined;
                     }
                 });
             });
+
         }
 
         // Helper to ensure numeric values from potentially string-y input data
-        const val = (v: any) => Number(v || 0);
+        // Moved to top of loop
 
         // --- Planets & Production ---
         if (prevTurn) {

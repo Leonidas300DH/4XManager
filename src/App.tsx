@@ -8,6 +8,7 @@ import PlanetsTab from './components/PlanetsTab';
 import LogTab from './components/LogTab';
 import DashboardTab from './components/DashboardTab';
 import SettingsModal from './components/SettingsModal';
+import { ConfirmModal } from './components/ConfirmModal';
 import { INITIAL_TURN_DATA, DEFAULT_SETTINGS, type TurnData, type AppSettings } from './types';
 import { calculateTurns } from './utils/calculations';
 
@@ -15,6 +16,7 @@ function App() {
   const [activeTab, setActiveTab] = useState('economy');
   const [currentTurnId, setCurrentTurnId] = useState<number>(1);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isNewGameConfirmOpen, setIsNewGameConfirmOpen] = useState(false);
 
   const [settings, setSettings] = useState<AppSettings>(() => {
     const saved = localStorage.getItem('4x_app_settings');
@@ -51,12 +53,15 @@ function App() {
   }, [turns]);
 
   const handleNewGame = () => {
-    if (window.confirm('WARNING: This will permanently delete your current session data. Proceed with a NEW MISSION?')) {
-      const resetTurns: TurnData[] = [{ ...INITIAL_TURN_DATA, id: 1 }];
-      setTurns(resetTurns);
-      setCurrentTurnId(1);
-      setIsSettingsOpen(false);
-    }
+    setIsNewGameConfirmOpen(true);
+  };
+
+  const confirmNewGame = () => {
+    const resetTurns: TurnData[] = [{ ...INITIAL_TURN_DATA, id: 1 }];
+    setTurns(resetTurns);
+    setCurrentTurnId(1);
+    setIsSettingsOpen(false);
+    setIsNewGameConfirmOpen(false);
   };
 
   const addTurn = () => {
@@ -156,13 +161,44 @@ function App() {
     setTurns(prevTurns => {
       const newTurns = [...prevTurns];
       // @ts-ignore
-      (newTurns[turnIndex] as any) = {
+      newTurns[turnIndex] = {
         ...newTurns[turnIndex],
         [section]: {
           ...(newTurns[turnIndex][section] as any),
           ...updates
         }
       };
+      return calculateTurns(newTurns);
+    });
+  };
+
+  const handleBatchUpdate = (turnIndex: number, updates: { section: keyof TurnData, field: string, value: any }[]) => {
+    setTurns(prevTurns => {
+      const newTurns = [...prevTurns];
+      let turn = JSON.parse(JSON.stringify(newTurns[turnIndex]));
+
+      updates.forEach(({ section, field, value }) => {
+        if (field.includes('.')) {
+          // Helper to set nested value (simplified for batch)
+          const path = field.split('.');
+          const setNested = (obj: any, path: string[], val: any): any => {
+            const [current, ...rest] = path;
+            if (rest.length === 0) return { ...obj, [current]: val };
+            if (Array.isArray(obj[current])) {
+              const arr = [...obj[current]];
+              const idx = Number(rest[0]);
+              arr[idx] = setNested(arr[idx], rest.slice(1), val);
+              return { ...obj, [current]: arr };
+            }
+            return { ...obj, [current]: setNested(obj[current] || {}, rest, val) };
+          };
+          turn[section] = setNested(turn[section], path, value);
+        } else {
+          turn[section][field] = value;
+        }
+      });
+
+      newTurns[turnIndex] = turn;
       return calculateTurns(newTurns);
     });
   };
@@ -413,6 +449,7 @@ function App() {
             currentTurnId={currentTurnId}
             onTurnClick={setCurrentTurnId}
             onUpdate={handleUpdate}
+            onBatchUpdate={handleBatchUpdate}
             onAddTurn={addTurn}
             onDeleteTurn={deleteTurn}
           />
@@ -481,6 +518,17 @@ function App() {
         onExportData={handleExportData}
         onImportData={handleImportData}
         onNewGame={handleNewGame}
+      />
+
+      <ConfirmModal
+        isOpen={isNewGameConfirmOpen}
+        title="COMMENCE NEW MISSION?"
+        message="WARNING: All current session data will be permanently purged. This action is IRREVERSIBLE."
+        confirmText="NEW MISSION"
+        cancelText="ABORT"
+        isDanger={true}
+        onConfirm={confirmNewGame}
+        onCancel={() => setIsNewGameConfirmOpen(false)}
       />
 
       {/* SVG Filters for HUD Chromatic Aberration */}

@@ -10,6 +10,7 @@ interface EconomyGridProps {
     currentTurnId: number;
     onTurnClick: (id: number) => void;
     onUpdate: (turnIndex: number, section: keyof TurnData, field: string, value: any) => void;
+    onBatchUpdate: (turnIndex: number, updates: { section: keyof TurnData, field: string, value: any }[]) => void;
     onAddTurn: () => void;
     onDeleteTurn: () => void;
 }
@@ -19,6 +20,7 @@ export const EconomyGrid: React.FC<EconomyGridProps> = ({
     currentTurnId,
     onTurnClick,
     onUpdate,
+    onBatchUpdate,
     onAddTurn,
     onDeleteTurn
 }) => {
@@ -47,17 +49,17 @@ export const EconomyGrid: React.FC<EconomyGridProps> = ({
     const isPastTurn = (turnId: number) => turnId < turns[turns.length - 1].id;
 
     const handleAutoAdjustAndAdd = (turn: TurnData) => {
-        const lpDelta = turn.lp.remaining < 0 ? -turn.lp.remaining : 0;
-        const cpDelta = turn.cp.remaining < 0 ? -turn.cp.remaining : 0;
-        const rpDelta = turn.rp.remaining < 0 ? -turn.rp.remaining : 0;
-        const tpDelta = turn.tp.remaining < 0 ? -turn.tp.remaining : 0;
-
         const turnIndex = turns.findIndex(t => t.id === turn.id);
+        const updates: { section: keyof TurnData, field: string, value: any }[] = [];
 
-        if (lpDelta > 0) handleUpdate(turnIndex, 'lp', 'adjustment', turn.lp.adjustment + lpDelta);
-        if (cpDelta > 0) handleUpdate(turnIndex, 'cp', 'adjustment', turn.cp.adjustment + cpDelta);
-        if (rpDelta > 0) handleUpdate(turnIndex, 'rp', 'adjustment', turn.rp.adjustment + rpDelta);
-        if (tpDelta > 0) handleUpdate(turnIndex, 'tp', 'adjustment', turn.tp.adjustment + tpDelta);
+        if (turn.lp.remaining < 0) updates.push({ section: 'lp', field: 'adjustment', value: turn.lp.adjustment + Math.abs(turn.lp.remaining) });
+        if (turn.cp.remaining < 0) updates.push({ section: 'cp', field: 'adjustment', value: turn.cp.adjustment + Math.abs(turn.cp.remaining) });
+        if (turn.rp.remaining < 0) updates.push({ section: 'rp', field: 'adjustment', value: turn.rp.adjustment + Math.abs(turn.rp.remaining) });
+        if (turn.tp.remaining < 0) updates.push({ section: 'tp', field: 'adjustment', value: turn.tp.adjustment + Math.abs(turn.tp.remaining) });
+
+        if (updates.length > 0) {
+            onBatchUpdate(turnIndex, updates);
+        }
 
         onAddTurn();
         setConfirmConfig(prev => ({ ...prev, isOpen: false }));
@@ -73,12 +75,9 @@ export const EconomyGrid: React.FC<EconomyGridProps> = ({
                 isOpen: true,
                 title: 'Negative Balances Detected',
                 message: 'You cannot start a new economic phase while you have negative remaining balances. Would you like to auto-adjust these balances to 0 using the adjustment fields and proceed?',
-                confirmText: 'Cancel',
-                cancelText: 'I will fix it manually',
-                extraActionText: 'Auto-adjust & Proceed',
-                extraActionClass: 'confirm',
-                onConfirm: () => setConfirmConfig(prev => ({ ...prev, isOpen: false })),
-                onExtraAction: () => handleAutoAdjustAndAdd(lastTurn)
+                confirmText: 'Auto-adjust & Proceed',
+                cancelText: 'Cancel',
+                onConfirm: () => handleAutoAdjustAndAdd(lastTurn)
             });
             return;
         }
@@ -86,7 +85,9 @@ export const EconomyGrid: React.FC<EconomyGridProps> = ({
         setConfirmConfig({
             isOpen: true,
             title: 'New Economic Phase',
-            message: 'Are you sure you want to add a new turn? You will no longer be able to edit the current turn once the new one is created.',
+            message: 'Are you sure you want to add a new turn? You will no longer be able to edit the previous turns once the new one is created.',
+            confirmText: 'CONFIRM',
+            cancelText: 'CANCEL',
             onConfirm: () => {
                 onAddTurn();
                 setConfirmConfig(prev => ({ ...prev, isOpen: false }));

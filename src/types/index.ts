@@ -137,16 +137,16 @@ export const INITIAL_TURN_DATA: TurnData = {
   rp: { carryOver: 0, income: 0, spending: 0, adjustment: 0, remaining: 0, purchasedTechs: [] },
   tp: { carryOver: 0, income: 0, spending: 0, adjustment: 0, remaining: 0 },
   fleet: {
-    SC: { groups: [{ id: 1, count: 3, techLevel: ["Movement 1"], techs: { attack: "0", defense: "0", move: "1" } }] },
-    Miner: { groups: [{ id: 1, count: 1, techLevel: ["Movement 1"], techs: { attack: "0", defense: "0", move: "1" } }] },
+    SC: { groups: [{ id: 1, count: 3, techLevel: ["Movement 1"], techs: { attack: "0", defense: "0", move: "1", tactics: "0" } }] },
+    Miner: { groups: [{ id: 1, count: 1, techLevel: ["Movement 1"], techs: { attack: "0", defense: "0", move: "1", tactics: "0" } }] },
     CO: {
       groups: [
-        { id: 1, count: 1, techLevel: ["Movement 1"], techs: { attack: "0", defense: "0", move: "1" } },
-        { id: 2, count: 1, techLevel: ["Movement 1"], techs: { attack: "0", defense: "0", move: "1" } },
-        { id: 3, count: 1, techLevel: ["Movement 1"], techs: { attack: "0", defense: "0", move: "1" } }
+        { id: 1, count: 1, techLevel: ["Movement 1"], techs: { attack: "0", defense: "0", move: "1", tactics: "0" } },
+        { id: 2, count: 1, techLevel: ["Movement 1"], techs: { attack: "0", defense: "0", move: "1", tactics: "0" } },
+        { id: 3, count: 1, techLevel: ["Movement 1"], techs: { attack: "0", defense: "0", move: "1", tactics: "0" } }
       ]
     },
-    SY: { groups: [{ id: 1, count: 4, techLevel: ["Shipyard 1", "Ship Size 1"], techs: { attack: "0", defense: "0", move: "1" } }] }
+    SY: { groups: [{ id: 1, count: 4, techLevel: ["Shipyard 1", "Ship Size 1"], techs: { attack: "0", defense: "0", move: "1", tactics: "0" } }] }
   },
   planets: [
     {
