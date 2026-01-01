@@ -49,7 +49,7 @@ export const FleetTab: React.FC<FleetTabProps> = ({ currentTurn, onUpdate, turnI
         return Array.from(new Set(levels)).sort((a, b) => a - b);
     };
 
-    const [sortOrder, setSortOrder] = useState<'default' | 'asc' | 'desc'>('default');
+    const [sortOrder, setSortOrder] = useState<'default' | 'asc' | 'desc' | 'cost-asc' | 'cost-desc' | 'size-asc' | 'size-desc' | 'class-asc' | 'class-desc'>('default');
     const [filterType, setFilterType] = useState<'all' | 'active' | 'buildable'>('all');
     // If category prop is provided, ignore internal state for category
     const [internalCategoryFilter, setInternalCategoryFilter] = useState<'All Units' | 'Spaceship' | 'Construction' | 'Ground Unit'>('All Units');
@@ -73,6 +73,21 @@ export const FleetTab: React.FC<FleetTabProps> = ({ currentTurn, onUpdate, turnI
         const max = Math.max(...levels);
         // Default to 1 as everyone starts with Ship Size 1 capability
         return max === 0 ? 1 : max;
+    };
+
+    // Fighter tech level helper - returns { level, baseAttack, baseDefense }
+    const getFighterTechStats = (): { level: number; baseAttack: number; baseDefense: number } => {
+        const levels = getAvailableLevels('Fighter');
+        const max = Math.max(...levels);
+        // Fighter stats by tech level:
+        // Fighter 1: B5-0, Fighter 2: B6-0, Fighter 3: B7-1, Fighter 4: B8-2
+        switch (max) {
+            case 1: return { level: 1, baseAttack: 5, baseDefense: 0 };
+            case 2: return { level: 2, baseAttack: 6, baseDefense: 0 };
+            case 3: return { level: 3, baseAttack: 7, baseDefense: 1 };
+            case 4: return { level: 4, baseAttack: 8, baseDefense: 2 };
+            default: return { level: 0, baseAttack: 5, baseDefense: 0 }; // No tech = locked
+        }
     };
 
     const calculateStat = (base: number | string, tech: number): string | number => {
@@ -287,16 +302,17 @@ export const FleetTab: React.FC<FleetTabProps> = ({ currentTurn, onUpdate, turnI
 
     const renderTechBadges = (ship: ShipDefinition) => {
         const badges = [];
+        const isFighterShip = ship.acronym === 'F';
 
-        // Attack Badge
-        const maxAttack = ship.maxAttack ?? ship.hullSize;
+        // Attack Badge - Fighters capped at Attack 1 (hull size 1)
+        const maxAttack = isFighterShip ? 1 : (ship.maxAttack ?? ship.hullSize);
         const bestAttack = Math.max(...availableAttackLevels.filter(l => l <= maxAttack));
         if (bestAttack > 0) {
             badges.push({ label: `Attack ${bestAttack}`, type: 'attack' });
         }
 
-        // Defense Badge
-        const maxDefense = ship.maxDefense ?? ship.hullSize;
+        // Defense Badge - Fighters capped at Defense 1 (hull size 1)
+        const maxDefense = isFighterShip ? 1 : (ship.maxDefense ?? ship.hullSize);
         const bestDefense = Math.max(...availableDefenseLevels.filter(l => l <= maxDefense));
         if (bestDefense > 0) {
             badges.push({ label: `Defense ${bestDefense}`, type: 'defense' });
@@ -320,8 +336,11 @@ export const FleetTab: React.FC<FleetTabProps> = ({ currentTurn, onUpdate, turnI
             badges.push({ label: `Security Forces ${bestSecurity}`, type: 'special' });
         }
 
-        // Point Defense Badge (Scouts only)
-        if (ship.acronym === 'SC' || ship.acronym === 'SCX') {
+        // Fast Badge - ONLY for BC (Battlecruiser)
+        // For all other ships, Fast tech just enables building new units
+
+        // Point Defense Badge (SC only)
+        if (ship.acronym === 'SC') {
             const bestPD = Math.max(...availablePDLevels);
             if (bestPD > 0) {
                 // PD 1 = A6, PD 2 = A7, PD 3 = A8
@@ -330,8 +349,8 @@ export const FleetTab: React.FC<FleetTabProps> = ({ currentTurn, onUpdate, turnI
             }
         }
 
-        // Move Badge
-        if (ship.moveType !== 'none') {
+        // Move Badge - Fighters never benefit from Move tech
+        if (ship.moveType !== 'none' && !isFighterShip) {
             const bestMove = Math.max(...availableMoveLevels);
             // Badge label shows the TECH level by default
             let labelLevel = bestMove;
@@ -365,16 +384,10 @@ export const FleetTab: React.FC<FleetTabProps> = ({ currentTurn, onUpdate, turnI
             badges.push({ label: 'Scanner', type: 'special' });
         }
 
-        // DDX: Scanner, Fast 1&2, Heavy Warheads
+        // DDX: Scanner, Heavy Warheads (Fast enables building but no badge)
         if (ship.acronym === 'DDX') {
             if (hasTech('Scanner')) badges.push({ label: 'Scanner', type: 'special' });
             if (hasTech('Heavy Warheads')) badges.push({ label: 'Heavy Warheads', type: 'special' });
-
-            const fastLevels = getAvailableLevels('Fast'); // Returns [0, 1, 2...]
-            const maxFast = Math.max(...fastLevels);
-            if (maxFast > 0) {
-                badges.push({ label: `Fast ${maxFast}`, type: 'move' }); // Using move type for blue color
-            }
         }
 
         // CA: Exploration 1 & 2, Jammer
@@ -388,13 +401,12 @@ export const FleetTab: React.FC<FleetTabProps> = ({ currentTurn, onUpdate, turnI
             }
         }
 
-        // BC: Fast 1
+        // BC: Fast 1 (gives +1 movement on first hex) - BC only benefits from Fast 1, not higher levels
         if (ship.acronym === 'BC') {
             const fastLevels = getAvailableLevels('Fast');
-            // Only care about Fast 1 or higher, display "Fast 1" (or higher if they have it, though BC usually just Fast 1?)
             const maxFast = Math.max(...fastLevels);
-            if (maxFast > 0) {
-                badges.push({ label: `Fast ${maxFast}`, type: 'move' });
+            if (maxFast >= 1) {
+                badges.push({ label: 'Fast 1', type: 'move' });
             }
         }
 
@@ -413,41 +425,22 @@ export const FleetTab: React.FC<FleetTabProps> = ({ currentTurn, onUpdate, turnI
             if (hasTech('Cloaking')) badges.push({ label: 'Cloaking', type: 'special' });
         }
 
-        // Raider X: Cloaking, Fast 2
+        // Raider X: Cloaking (Fast enables building but no badge)
         if (ship.acronym === 'RX') {
             if (hasTech('Cloaking')) badges.push({ label: 'Cloaking', type: 'special' });
-
-            const fastLevels = getAvailableLevels('Fast');
-            const maxFast = Math.max(...fastLevels);
-            // Requires Fast 2
-            if (maxFast >= 2) {
-                badges.push({ label: `Fast ${maxFast}`, type: 'move' });
-            }
         }
 
-        // Battle Carrier (BV): Exploration 2, Fast 2, Fighter
+        // Battle Carrier (BV): Exploration 2 only (Fast enables building but no badge)
         if (ship.acronym === 'BV') {
             const explLevels = getAvailableLevels('Exploration');
             const maxExpl = Math.max(...explLevels);
             if (maxExpl >= 2) {
                 badges.push({ label: `Exploration ${maxExpl}`, type: 'special' });
             }
-
-            const fastLevels = getAvailableLevels('Fast');
-            const maxFast = Math.max(...fastLevels);
-            if (maxFast >= 2) {
-                badges.push({ label: `Fast ${maxFast}`, type: 'move' });
-            }
-
-            const fighterLevels = getAvailableLevels('Fighter');
-            const maxFighter = Math.max(...fighterLevels);
-            if (maxFighter > 0) {
-                badges.push({ label: `Fighter ${maxFighter}`, type: 'special' });
-            }
         }
 
-        // CV: Fighter
-        if (ship.type.includes('Carrier') && ship.acronym !== 'BV') {
+        // Fighter: Show Fighter tech level
+        if (ship.acronym === 'F') {
             const fighterLevels = getAvailableLevels('Fighter');
             const maxFighter = Math.max(...fighterLevels);
             if (maxFighter > 0) {
@@ -507,20 +500,21 @@ export const FleetTab: React.FC<FleetTabProps> = ({ currentTurn, onUpdate, turnI
     };
 
     const getFastBonus = (ship: ShipDefinition): number => {
-        if (!ship.specialTech) return 0;
-
         const userFastLevel = Math.max(...availableFastLevels);
         if (userFastLevel === 0) return 0;
 
-        // Split by comma and trim
-        const parts = ship.specialTech.split(',').map(s => s.trim());
+        // BC: Only benefits from Fast 1 (gives +1 movement on first hex)
+        if (ship.acronym === 'BC' && userFastLevel >= 1) {
+            return 1;
+        }
 
+        // Other ships with Fast tech in specialTech (legacy handling)
+        if (!ship.specialTech) return 0;
+        const parts = ship.specialTech.split(',').map(s => s.trim());
         for (const part of parts) {
-            // Match "Fast X"
-            const match = part.match(/^Fast (\d+)/);
+            const match = part.match(/Fast (\d+)/);
             if (match) {
                 const reqLevel = parseInt(match[1]);
-                // If user has enough Fast tech, grant +1 bonus
                 if (userFastLevel >= reqLevel) {
                     return 1;
                 }
@@ -555,6 +549,26 @@ export const FleetTab: React.FC<FleetTabProps> = ({ currentTurn, onUpdate, turnI
             ships.sort((a, b) => a.type.localeCompare(b.type));
         } else if (sortOrder === 'desc') {
             ships.sort((a, b) => b.type.localeCompare(a.type));
+        } else if (sortOrder === 'cost-asc') {
+            ships.sort((a, b) => (a.cost ?? 0) - (b.cost ?? 0));
+        } else if (sortOrder === 'cost-desc') {
+            ships.sort((a, b) => (b.cost ?? 0) - (a.cost ?? 0));
+        } else if (sortOrder === 'size-asc') {
+            ships.sort((a, b) => {
+                const aSize = typeof a.shipSize === 'number' ? a.shipSize : 99;
+                const bSize = typeof b.shipSize === 'number' ? b.shipSize : 99;
+                return aSize - bSize;
+            });
+        } else if (sortOrder === 'size-desc') {
+            ships.sort((a, b) => {
+                const aSize = typeof a.shipSize === 'number' ? a.shipSize : 0;
+                const bSize = typeof b.shipSize === 'number' ? b.shipSize : 0;
+                return bSize - aSize;
+            });
+        } else if (sortOrder === 'class-asc') {
+            ships.sort((a, b) => a.baseClass.localeCompare(b.baseClass));
+        } else if (sortOrder === 'class-desc') {
+            ships.sort((a, b) => b.baseClass.localeCompare(a.baseClass));
         }
 
         return ships;
@@ -578,8 +592,14 @@ export const FleetTab: React.FC<FleetTabProps> = ({ currentTurn, onUpdate, turnI
                         onChange={(e) => setSortOrder(e.target.value as any)}
                     >
                         <option value="default">Default</option>
-                        <option value="asc">A-Z</option>
-                        <option value="desc">Z-A</option>
+                        <option value="asc">Name A-Z</option>
+                        <option value="desc">Name Z-A</option>
+                        <option value="cost-asc">Cost ↑</option>
+                        <option value="cost-desc">Cost ↓</option>
+                        <option value="size-asc">Ship Size ↑</option>
+                        <option value="size-desc">Ship Size ↓</option>
+                        <option value="class-asc">Class A-Z</option>
+                        <option value="class-desc">Class Z-A</option>
                     </select>
                 </div>
 
@@ -677,6 +697,7 @@ export const FleetTab: React.FC<FleetTabProps> = ({ currentTurn, onUpdate, turnI
                                             {!isGroundUnit && <th className="hidden-column">Defense</th>}
                                             <th style={{ textAlign: 'center' }}>Att</th>
                                             <th style={{ textAlign: 'center' }}>Def</th>
+                                            {!isGroundUnit && !isConstruction && <th>Hull</th>}
                                             {!isGroundUnit && !isConstruction && <th>Move</th>}
                                         </tr>
                                     </thead>
@@ -685,7 +706,29 @@ export const FleetTab: React.FC<FleetTabProps> = ({ currentTurn, onUpdate, turnI
                                             const group = getGroupState(ship.acronym, groupId);
 
                                             const shipSizeTech = getShipSizeTechLevel();
-                                            const isLocked = typeof ship.shipSize === 'number' && ship.shipSize > shipSizeTech;
+                                            const fighterStats = getFighterTechStats();
+                                            const fastLevels = getAvailableLevels('Fast');
+                                            const maxFast = Math.max(...fastLevels);
+
+                                            // Lock logic for different ship types
+                                            const isFighter = ship.acronym === 'F';
+                                            const isCarrier = ship.acronym === 'CV';
+                                            const isBattleCarrier = ship.acronym === 'BV';
+
+                                            let isLocked = false;
+                                            if (isFighter) {
+                                                // Fighters: locked until Fighter 1 acquired
+                                                isLocked = fighterStats.level === 0;
+                                            } else if (isCarrier) {
+                                                // Carrier: locked until Fighter 1 acquired
+                                                isLocked = fighterStats.level === 0;
+                                            } else if (isBattleCarrier) {
+                                                // Battle Carrier: locked until Fighter 1 AND Fast 2 acquired
+                                                isLocked = fighterStats.level === 0 || maxFast < 2;
+                                            } else {
+                                                // Normal ships: locked by Ship Size tech
+                                                isLocked = typeof ship.shipSize === 'number' && ship.shipSize > shipSizeTech;
+                                            }
 
                                             const purchaseValue = group.purchase || 0;
                                             const adjustValue = group.adjust || 0;
@@ -702,17 +745,21 @@ export const FleetTab: React.FC<FleetTabProps> = ({ currentTurn, onUpdate, turnI
                                             const useUpgraded = group.isUpgraded || isConstruct;
 
                                             const displayTechList = ((isNewGroup || useUpgraded) ? bestGlobal.list : (group.techLevel || []))
-                                                .filter(t => !t.startsWith('Military Academy') && !t.startsWith('Security Forces'));
+                                                .filter(t => !t.startsWith('Military Academy') && !t.startsWith('Security Forces'))
+                                                .filter(t => !isFighter || !t.startsWith('Move')); // Fighters don't benefit from Move
 
-                                            const attackVal = (isNewGroup || useUpgraded) ? Math.min(bestGlobal.attack, ship.maxAttack ?? ship.hullSize ?? 1) : parseInt(group.techs.attack || "0");
-                                            const defenseVal = (isNewGroup || useUpgraded) ? Math.min(bestGlobal.defense, ship.maxDefense ?? ship.hullSize ?? 1) : parseInt(group.techs.defense || "0");
+                                            // Fighters: Attack/Defense capped at hull size 1
+                                            const effectiveMaxAttack = isFighter ? 1 : (ship.maxAttack ?? ship.hullSize ?? 1);
+                                            const effectiveMaxDefense = isFighter ? 1 : (ship.maxDefense ?? ship.hullSize ?? 1);
+                                            const attackVal = (isNewGroup || useUpgraded) ? Math.min(bestGlobal.attack, effectiveMaxAttack) : parseInt(group.techs.attack || "0");
+                                            const defenseVal = (isNewGroup || useUpgraded) ? Math.min(bestGlobal.defense, effectiveMaxDefense) : parseInt(group.techs.defense || "0");
                                             const moveVal = (isNewGroup || useUpgraded) ? bestGlobal.move : parseInt(group.techs.move || "1");
                                             const tacticsVal = (isNewGroup || useUpgraded) ? bestGlobal.tactics : parseInt(group.techs.tactics || "0");
 
                                             // Check if already maxed out
                                             const isAlreadyMaxed =
-                                                attackVal >= Math.min(bestGlobal.attack, ship.maxAttack ?? ship.hullSize ?? 1) &&
-                                                defenseVal >= Math.min(bestGlobal.defense, ship.maxDefense ?? ship.hullSize ?? 1) &&
+                                                attackVal >= Math.min(bestGlobal.attack, effectiveMaxAttack) &&
+                                                defenseVal >= Math.min(bestGlobal.defense, effectiveMaxDefense) &&
                                                 moveVal >= bestGlobal.move &&
                                                 (ship.category !== 'Spaceship' || tacticsVal >= bestGlobal.tactics);
 
@@ -731,8 +778,16 @@ export const FleetTab: React.FC<FleetTabProps> = ({ currentTurn, onUpdate, turnI
                                             let currentDefense: string | number = ship.baseDefense;
 
                                             if (!isGroundUnit) {
-                                                currentAttack = calculateStat(ship.baseAttack, attackVal);
-                                                currentDefense = calculateStat(ship.baseDefense, defenseVal);
+                                                if (isFighter) {
+                                                    // Fighters: use Fighter tech base stats + Attack/Defense tech (capped at hull size 1)
+                                                    const fighterAttackBonus = Math.min(attackVal, 1); // Hull size 1 = max Attack 1
+                                                    const fighterDefenseBonus = Math.min(defenseVal, 1); // Hull size 1 = max Defense 1
+                                                    currentAttack = fighterStats.baseAttack + fighterAttackBonus;
+                                                    currentDefense = fighterStats.baseDefense + fighterDefenseBonus;
+                                                } else {
+                                                    currentAttack = calculateStat(ship.baseAttack, attackVal);
+                                                    currentDefense = calculateStat(ship.baseDefense, defenseVal);
+                                                }
                                             }
 
                                             // Determine effective move level for chart
@@ -853,15 +908,27 @@ export const FleetTab: React.FC<FleetTabProps> = ({ currentTurn, onUpdate, turnI
                                                         </td>
                                                     )}
                                                     <td style={{ textAlign: 'center' }}>
-                                                        <span className={!isGroundUnit && attackVal > 0 ? "stat-value enhanced" : "stat-value"}>
+                                                        <span className={!isGroundUnit && (isFighter ? (currentAttack as number) > 5 : attackVal > 0) ? "stat-value enhanced" : "stat-value"}>
                                                             {currentAttack}
                                                         </span>
                                                     </td>
                                                     <td style={{ textAlign: 'center' }}>
-                                                        <span className={!isGroundUnit && defenseVal > 0 ? "stat-value enhanced" : "stat-value"}>
+                                                        <span className={!isGroundUnit && (isFighter ? (currentDefense as number) > 0 : defenseVal > 0) ? "stat-value enhanced" : "stat-value"}>
                                                             {currentDefense}
                                                         </span>
                                                     </td>
+                                                    {!isGroundUnit && !isConstruction && (() => {
+                                                        const baseHull = ship.hullSize;
+                                                        const isLegendary = effectiveExp === 'Legendary';
+                                                        const displayHull = isLegendary ? baseHull + 1 : baseHull;
+                                                        return (
+                                                            <td style={{ textAlign: 'center' }}>
+                                                                <span className={isLegendary ? "stat-value hull-legendary" : "stat-value"}>
+                                                                    {displayHull}
+                                                                </span>
+                                                            </td>
+                                                        );
+                                                    })()}
                                                     {!isGroundUnit && !isConstruction && (
                                                         <td>
                                                             {ship.moveType === 'fixed-1' ? (
@@ -895,12 +962,28 @@ export const FleetTab: React.FC<FleetTabProps> = ({ currentTurn, onUpdate, turnI
                                                 <div className="ship-header-top">
                                                     <div className="ship-name">
                                                         {ship.type} <span style={{ fontSize: '0.8em', opacity: 0.7 }}>({ship.acronym})</span>
-                                                        {ship.category !== 'Ground Unit' && (
-                                                            <span className={`ship-size-badge ${typeof ship.shipSize === 'number' && ship.shipSize > getShipSizeTechLevel() ? 'locked' : ''}`}>
-                                                                {typeof ship.shipSize === 'number' && ship.shipSize > getShipSizeTechLevel() ? '🔒 ' : ''}
-                                                                Size: {ship.shipSize}
-                                                            </span>
-                                                        )}
+                                                        {ship.category !== 'Ground Unit' && (() => {
+                                                            const fighterStats = getFighterTechStats();
+                                                            const fastLevels = getAvailableLevels('Fast');
+                                                            const maxFast = Math.max(...fastLevels);
+
+                                                            // Special lock conditions
+                                                            let isShipLocked = false;
+                                                            if (ship.acronym === 'F' || ship.acronym === 'CV') {
+                                                                isShipLocked = fighterStats.level === 0;
+                                                            } else if (ship.acronym === 'BV') {
+                                                                isShipLocked = fighterStats.level === 0 || maxFast < 2;
+                                                            } else if (typeof ship.shipSize === 'number') {
+                                                                isShipLocked = ship.shipSize > getShipSizeTechLevel();
+                                                            }
+
+                                                            return (
+                                                                <span className={`ship-size-badge ${isShipLocked ? 'locked' : ''}`}>
+                                                                    {isShipLocked ? '🔒 ' : ''}
+                                                                    Size: {ship.shipSize}
+                                                                </span>
+                                                            );
+                                                        })()}
                                                     </div>
                                                     <div className="ship-stats-right">
                                                         <span className="stat-badge cost-badge">Cost: {ship.cost !== undefined ? (ship.cost === 0 ? 'Free' : `${ship.cost} CP`) : '-'}</span>
@@ -910,13 +993,22 @@ export const FleetTab: React.FC<FleetTabProps> = ({ currentTurn, onUpdate, turnI
                                                             let enhancedDefense: string | number = ship.baseDefense;
 
                                                             if (!isGroundUnit) {
-                                                                const maxAttack = ship.maxAttack ?? ship.hullSize;
-                                                                const bestAttack = Math.max(...availableAttackLevels.filter(l => l <= maxAttack));
-                                                                enhancedAttack = calculateStat(ship.baseAttack, bestAttack);
+                                                                // Special handling for Fighters
+                                                                if (ship.acronym === 'F') {
+                                                                    const fStats = getFighterTechStats();
+                                                                    const attackBonus = Math.min(Math.max(...availableAttackLevels), 1);
+                                                                    const defenseBonus = Math.min(Math.max(...availableDefenseLevels), 1);
+                                                                    enhancedAttack = fStats.baseAttack + attackBonus;
+                                                                    enhancedDefense = fStats.baseDefense + defenseBonus;
+                                                                } else {
+                                                                    const maxAttack = ship.maxAttack ?? ship.hullSize;
+                                                                    const bestAttack = Math.max(...availableAttackLevels.filter(l => l <= maxAttack));
+                                                                    enhancedAttack = calculateStat(ship.baseAttack, bestAttack);
 
-                                                                const maxDefense = ship.maxDefense ?? ship.hullSize;
-                                                                const bestDefense = Math.max(...availableDefenseLevels.filter(l => l <= maxDefense));
-                                                                enhancedDefense = calculateStat(ship.baseDefense, bestDefense);
+                                                                    const maxDefense = ship.maxDefense ?? ship.hullSize;
+                                                                    const bestDefense = Math.max(...availableDefenseLevels.filter(l => l <= maxDefense));
+                                                                    enhancedDefense = calculateStat(ship.baseDefense, bestDefense);
+                                                                }
                                                             }
 
                                                             return (

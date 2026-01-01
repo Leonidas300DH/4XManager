@@ -87,7 +87,7 @@ export const SHIP_DEFINITIONS: ShipDefinition[] = [
     {
         type: "Battle Carrier", acronym: "BV", hullSize: 3, shipSize: "-", baseClass: "B", baseAttack: 5, baseDefense: 3, tactics: 5, move: 1,
         specialTech: "Can carry up to 6 fighter squadrons. Anti-Sensor Hull: immune to Mines. Can be equipped with Exploration 2 and Fast 2. Can not be targeted until all friendly fighters present in the battle are destroyed.", notes: "", maxCount: 6, groups: [1, 2, 3, 4, 5, 6],
-        maxAttack: 2, maxDefense: 2, category: 'Spaceship',
+        maxAttack: 3, maxDefense: 3, category: 'Spaceship',
         cost: 20
     },
     {
