@@ -1,73 +1,183 @@
-# React + TypeScript + Vite
+# 🚀 4XManager - Gestionnaire Space Empires 4X
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+![React](https://img.shields.io/badge/React-19.2-61DAFB?logo=react&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-7.2-646CFF?logo=vite&logoColor=white)
+![Vercel](https://img.shields.io/badge/Deployed-Vercel-000000?logo=vercel&logoColor=white)
 
-Currently, two official plugins are available:
+**Application web de suivi pour le jeu de plateau [Space Empires 4X](https://www.gmtgames.com/p-512-space-empires-4x-4th-printing.aspx)**
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Automatise la gestion économique complexe et le suivi des flottes pour vous permettre de vous concentrer sur la stratégie !
 
-## React Compiler
+🌐 **[Accéder à l'application](https://manager4x.vercel.app)**
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## ✨ Fonctionnalités
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### 📊 Gestion Économique
+- Suivi des ressources : **CP** (Points de Construction), **RP** (Points de Recherche), **LP** (Points Logistiques), **TP** (Points Temporels)
+- Phases économiques multi-tours avec propagation réactive
+- Calcul automatique de la maintenance et des pénalités
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### 🔬 Technologies
+- Arbre technologique complet avec héritage dynamique
+- Badges de recherche et niveaux par catégorie
+- Modernisation automatique des unités de construction
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### 🪐 Planètes & Colonies
+- Gestion du Homeworld et des colonies
+- Croissance de population et niveaux CP
+- Construction de facilités (Industrielles, Logistiques, Recherche, Temporelles)
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### ⚔️ Gestion de Flotte
+- Suivi des groupes de vaisseaux avec illustrations dynamiques
+- Système d'upgrade togglable pour les vaisseaux spatiaux
+- Calculs de mouvement et bonus de vitesse (Fast Tech)
+- Support spécialisé : Fighters (F), Carriers (CV/BV), Battlecruisers (BC)
+
+### 📓 Journal de Bord
+- Historique chronologique de toutes les actions
+- Commentaires éditables par tour pour le journaling stratégique
+
+### 📈 Tableau de Bord
+- Vue d'ensemble tactique de l'empire
+- Registre planétaire et aperçu de l'Amirauté
+- Briefing technique des recherches acquises
+
+### ⚙️ Paramètres
+- Personnalisation des couleurs de ressources (CSS variables)
+- Export/Import JSON pour sauvegarde et synchronisation multi-appareils
+- Persistance automatique via LocalStorage
+
+---
+
+## 🛠️ Stack Technique
+
+| Technologie | Version | Rôle |
+|-------------|---------|------|
+| React | 19.2.0 | Framework UI |
+| TypeScript | 5.9.3 | Typage statique |
+| Vite | 7.2.4 | Build tool & dev server |
+| CSS | - | Styling composant par composant |
+| Vercel | - | Hébergement & CI/CD |
+
+---
+
+## 📁 Structure du Projet
+
+```
+4XManager/
+├── public/
+│   └── images/
+│       ├── planets/     # Illustrations des planètes
+│       └── ships/       # Illustrations des vaisseaux
+├── src/
+│   ├── components/      # Composants React
+│   │   ├── Cell.tsx
+│   │   ├── ConfirmModal.tsx
+│   │   ├── DashboardTab.tsx
+│   │   ├── EconomyGrid.tsx
+│   │   ├── FleetTab.tsx
+│   │   ├── HudOverlay.tsx
+│   │   ├── LogTab.tsx
+│   │   ├── PlanetsTab.tsx
+│   │   ├── ResearchTab.tsx
+│   │   └── SettingsModal.tsx
+│   ├── data/            # Définitions statiques
+│   │   ├── shipDefinitions.ts
+│   │   └── technologies.ts
+│   ├── types/           # Types TypeScript
+│   ├── utils/           # Utilitaires
+│   │   └── calculations.ts  # Moteur de calcul réactif
+│   ├── App.tsx          # Composant principal
+│   └── main.tsx         # Point d'entrée
+└── package.json
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## 🚀 Installation & Développement
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Prérequis
+- **Node.js** 18+ recommandé
+- **npm** ou **yarn**
+
+### Installation
+
+```bash
+# Cloner le repository
+git clone https://github.com/Leonidas300DH/4XManager.git
+cd 4XManager
+
+# Installer les dépendances
+npm install
 ```
+
+### Développement
+
+```bash
+# Lancer le serveur de développement
+npm run dev
+```
+
+L'application sera accessible sur `http://localhost:5173`
+
+### Build Production
+
+```bash
+# Compiler pour la production
+npm run build
+
+# Prévisualiser le build
+npm run preview
+```
+
+---
+
+## 📦 Déploiement
+
+L'application est automatiquement déployée sur **Vercel** à chaque push sur la branche principale.
+
+### Déploiement Manuel
+
+```bash
+# Installer Vercel CLI (si nécessaire)
+npm install -g vercel
+
+# Déployer
+vercel --prod
+```
+
+---
+
+## 🎮 Philosophie de Design
+
+### Propagation Réactive
+Toute modification au Tour N met automatiquement à jour tous les tours suivants (N+1, N+2, etc.)
+
+### Verrouillage Séquentiel
+Les tours précédant le dernier sont en lecture seule pour protéger l'intégrité historique
+
+### État Dérivé
+Les valeurs UI (stats d'unités upgradées) sont dérivées du pic technologique global, pas stockées en état redondant
+
+### Immutabilité
+Le moteur de calcul utilise le clonage profond pour éviter la corruption d'état React
+
+---
+
+## 📄 Licence
+
+Ce projet est développé à des fins personnelles pour accompagner les parties de Space Empires 4X.
+
+---
+
+## 🙏 Crédits
+
+- **GMT Games** pour l'excellent jeu de plateau [Space Empires 4X](https://www.gmtgames.com/)
+- Développé avec ❤️ par **Antigravity**
+
+---
+
+*Bon jeu et que votre empire prospère dans les étoiles !* 🌌
