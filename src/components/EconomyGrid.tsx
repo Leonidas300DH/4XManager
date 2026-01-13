@@ -234,7 +234,21 @@ export const EconomyGrid: React.FC<EconomyGridProps> = ({
                         {renderRow("- Maintenance", 'lp', 'maintenance', true, true, false, undefined, false, false, 'section-lp')}
                         {renderRow("- Turn order bid", 'lp', 'bid', true, false, false, undefined, false, false, 'section-lp')}
                         {renderRow("- LPs placed on LC colonies", 'lp', 'placedOnLC', true, false, false, undefined, false, false, 'section-lp')}
-                        {renderRow("LP Adjustment (+/-)", 'lp', 'adjustment', false, false, false, undefined, true, false, 'section-lp')}
+                        {renderRow("LP Adjustment (+/-)", 'lp', 'adjustment', false, false, false, (turn, index) => (
+                            <div className="adjustment-cell-wrapper">
+                                <Cell
+                                    value={turn.lp.adjustment}
+                                    onChange={(v) => handleUpdate(index, 'lp', 'adjustment', v)}
+                                    readOnly={isPastTurn(turn.id)}
+                                />
+                                {!isPastTurn(turn.id) && (
+                                    <div className="adjustment-buttons">
+                                        <button className="adj-btn adj-plus" onClick={() => handleUpdate(index, 'lp', 'adjustment', turn.lp.adjustment + 1)}>+</button>
+                                        <button className="adj-btn adj-minus" onClick={() => handleUpdate(index, 'lp', 'adjustment', turn.lp.adjustment - 1)}>−</button>
+                                    </div>
+                                )}
+                            </div>
+                        ), true, false, 'section-lp')}
                         {renderRow("Remaining LP (unlimited)", 'derived', null, false, true, true, (turn) => (
                             <Cell
                                 value={turn.lp.remaining}
@@ -334,7 +348,21 @@ export const EconomyGrid: React.FC<EconomyGridProps> = ({
                             <td></td>
                         </tr>
 
-                        {renderRow("CP Adjustment (+/-)", 'cp', 'adjustment', false, false, false, undefined, true, false, 'section-cp')}
+                        {renderRow("CP Adjustment (+/-)", 'cp', 'adjustment', false, false, false, (turn, index) => (
+                            <div className="adjustment-cell-wrapper">
+                                <Cell
+                                    value={turn.cp.adjustment}
+                                    onChange={(v) => handleUpdate(index, 'cp', 'adjustment', v)}
+                                    readOnly={isPastTurn(turn.id)}
+                                />
+                                {!isPastTurn(turn.id) && (
+                                    <div className="adjustment-buttons">
+                                        <button className="adj-btn adj-plus" onClick={() => handleUpdate(index, 'cp', 'adjustment', turn.cp.adjustment + 1)}>+</button>
+                                        <button className="adj-btn adj-minus" onClick={() => handleUpdate(index, 'cp', 'adjustment', turn.cp.adjustment - 1)}>−</button>
+                                    </div>
+                                )}
+                            </div>
+                        ), true, false, 'section-cp')}
 
                         {renderRow("Remaining CP (30 Max)", 'derived', null, false, true, true, (turn) => (
                             <Cell
@@ -393,7 +421,21 @@ export const EconomyGrid: React.FC<EconomyGridProps> = ({
                             <td></td>
                         </tr>
 
-                        {renderRow("RP Adjustment (+/-)", 'rp', 'adjustment', false, false, false, undefined, true, false, 'section-rp')}
+                        {renderRow("RP Adjustment (+/-)", 'rp', 'adjustment', false, false, false, (turn, index) => (
+                            <div className="adjustment-cell-wrapper">
+                                <Cell
+                                    value={turn.rp.adjustment}
+                                    onChange={(v) => handleUpdate(index, 'rp', 'adjustment', v)}
+                                    readOnly={isPastTurn(turn.id)}
+                                />
+                                {!isPastTurn(turn.id) && (
+                                    <div className="adjustment-buttons">
+                                        <button className="adj-btn adj-plus" onClick={() => handleUpdate(index, 'rp', 'adjustment', turn.rp.adjustment + 1)}>+</button>
+                                        <button className="adj-btn adj-minus" onClick={() => handleUpdate(index, 'rp', 'adjustment', turn.rp.adjustment - 1)}>−</button>
+                                    </div>
+                                )}
+                            </div>
+                        ), true, false, 'section-rp')}
 
                         {renderRow("Remaining RP (30 Max)", 'derived', null, false, true, true, (turn) => (
                             <Cell
@@ -426,7 +468,21 @@ export const EconomyGrid: React.FC<EconomyGridProps> = ({
                             </div>
                         ), false, false, 'section-tp')}
                         {renderRow("- TP spending", 'tp', 'spending', true, false, false, undefined, false, false, 'section-tp')}
-                        {renderRow("TP Adjustment (+/-)", 'tp', 'adjustment', false, false, false, undefined, true, false, 'section-tp')}
+                        {renderRow("TP Adjustment (+/-)", 'tp', 'adjustment', false, false, false, (turn, index) => (
+                            <div className="adjustment-cell-wrapper">
+                                <Cell
+                                    value={turn.tp.adjustment}
+                                    onChange={(v) => handleUpdate(index, 'tp', 'adjustment', v)}
+                                    readOnly={isPastTurn(turn.id)}
+                                />
+                                {!isPastTurn(turn.id) && (
+                                    <div className="adjustment-buttons">
+                                        <button className="adj-btn adj-plus" onClick={() => handleUpdate(index, 'tp', 'adjustment', turn.tp.adjustment + 1)}>+</button>
+                                        <button className="adj-btn adj-minus" onClick={() => handleUpdate(index, 'tp', 'adjustment', turn.tp.adjustment - 1)}>−</button>
+                                    </div>
+                                )}
+                            </div>
+                        ), true, false, 'section-tp')}
                         {renderRow("Remaining TP (unlimited)", 'derived', null, false, true, true, (turn) => (
                             <Cell value={turn.tp.remaining} readOnly className="highlight-cell" />
                         ), false, false, 'section-tp')}
