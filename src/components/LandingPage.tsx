@@ -254,7 +254,7 @@ const LandingPage: React.FC<LandingPageProps> = ({
             const cy = height / 2;
             const maxR = Math.min(width, height) * 0.42;
 
-            ctx.strokeStyle = '#0a1520';
+            ctx.strokeStyle = '#1a3040';
             ctx.lineWidth = 1;
 
             for (let x = 0; x < width; x += 60) {
@@ -270,12 +270,14 @@ const LandingPage: React.FC<LandingPageProps> = ({
                 ctx.stroke();
             }
 
-            ctx.strokeStyle = '#0c2030';
+            ctx.strokeStyle = '#2a5070';
+            ctx.lineWidth = 2;
             ctx.beginPath();
             ctx.arc(cx, cy, maxR, 0, Math.PI * 2);
             ctx.stroke();
 
-            ctx.strokeStyle = '#081518';
+            ctx.strokeStyle = '#1a3550';
+            ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.arc(cx, cy, maxR * 0.66, 0, Math.PI * 2);
             ctx.stroke();
@@ -284,6 +286,7 @@ const LandingPage: React.FC<LandingPageProps> = ({
             ctx.arc(cx, cy, maxR * 0.33, 0, Math.PI * 2);
             ctx.stroke();
         };
+
 
         const drawSweep = () => {
             const cx = width / 2;
@@ -486,7 +489,7 @@ const LandingPage: React.FC<LandingPageProps> = ({
             const msg = chatter[chatterIndex % chatter.length];
             addComm(msg.sender, msg.text, msg.type);
             chatterIndex++;
-            setTimeout(startChatter, 1200 + Math.random() * 1800);
+            setTimeout(startChatter, 600 + Math.random() * 600); // Faster messages
         };
 
         playScript();
