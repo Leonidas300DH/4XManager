@@ -126,7 +126,7 @@ const LandingPage: React.FC<LandingPageProps> = ({
                 }
             }
 
-            update() {
+            update(allShips: Ship[]) {
                 const cx = width / 2;
                 const cy = height / 2;
                 const maxR = Math.min(width, height) * 0.35;
@@ -135,36 +135,69 @@ const LandingPage: React.FC<LandingPageProps> = ({
                     // Squadron member - follow leader with offset
                     const tx = this.leader.x + this.offset.x;
                     const ty = this.leader.y + this.offset.y;
-                    this.x += (tx - this.x) * 0.08; // Faster follow for tighter formation
+                    this.x += (tx - this.x) * 0.08;
                     this.y += (ty - this.y) * 0.08;
                     this.angle = this.leader.angle;
                 } else {
-                    // Independent ship - wander with smooth edge avoidance
-                    this.angle += (Math.random() - 0.5) * 0.01;
+                    // Independent ship - dogfight behavior
+
+                    // Find nearest enemy
+                    let nearestEnemy: Ship | null = null;
+                    let nearestDist = Infinity;
+                    allShips.forEach(other => {
+                        if (other.team !== this.team && !other.leader) {
+                            const dx = other.x - this.x;
+                            const dy = other.y - this.y;
+                            const d = Math.sqrt(dx * dx + dy * dy);
+                            if (d < nearestDist && d < 150) { // Engagement range
+                                nearestDist = d;
+                                nearestEnemy = other;
+                            }
+                        }
+                    });
+
+                    // Smooth random wandering
+                    this.angle += (Math.random() - 0.5) * 0.02;
+
+                    // Engage enemy if nearby - turn towards them
+                    if (nearestEnemy) {
+                        const angleToEnemy = Math.atan2(nearestEnemy.y - this.y, nearestEnemy.x - this.x);
+                        let angleDiff = angleToEnemy - this.angle;
+                        while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+                        while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+
+                        // Smooth turn towards enemy (fighters more aggressive)
+                        const aggression = this.type === 'fighter' ? 0.04 : 0.02;
+                        this.angle += angleDiff * aggression;
+
+                        // Add evasive jitter in close combat
+                        if (nearestDist < 60) {
+                            this.angle += (Math.random() - 0.5) * 0.08;
+                        }
+                    }
 
                     const dx = this.x - cx;
                     const dy = this.y - cy;
                     const dist = Math.sqrt(dx * dx + dy * dy);
 
-                    // Smooth turn when approaching edge (start turning at 80% of maxR)
+                    // Smooth turn when approaching edge
                     if (dist > maxR * 0.8) {
                         const angleToCenter = Math.atan2(cy - this.y, cx - this.x);
-                        // Gradually blend towards center - stronger as we get closer to edge
                         const edgeFactor = (dist - maxR * 0.8) / (maxR * 0.2);
-                        const turnStrength = Math.min(edgeFactor * 0.05, 0.1);
+                        const turnStrength = Math.min(edgeFactor * 0.06, 0.12);
 
-                        // Smooth angle interpolation
                         let angleDiff = angleToCenter - this.angle;
                         while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
                         while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
                         this.angle += angleDiff * turnStrength;
                     }
 
-                    // Apply movement
-                    this.x += Math.cos(this.angle) * this.speed;
-                    this.y += Math.sin(this.angle) * this.speed;
+                    // Apply movement with speed variation
+                    const speedVariation = 0.9 + Math.random() * 0.2;
+                    this.x += Math.cos(this.angle) * this.speed * speedVariation;
+                    this.y += Math.sin(this.angle) * this.speed * speedVariation;
 
-                    // Hard boundary (should rarely hit due to smooth turning)
+                    // Hard boundary
                     if (dist > maxR) {
                         this.x = cx + dx * (maxR / dist) * 0.98;
                         this.y = cy + dy * (maxR / dist) * 0.98;
@@ -424,7 +457,7 @@ const LandingPage: React.FC<LandingPageProps> = ({
             drawSweep();
 
             ships.forEach(ship => {
-                ship.update();
+                ship.update(ships);
                 ship.draw(ctx);
             });
 
