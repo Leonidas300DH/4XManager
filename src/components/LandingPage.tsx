@@ -225,7 +225,7 @@ const LandingPage: React.FC<LandingPageProps> = ({
 
             draw(context: CanvasRenderingContext2D) {
                 const col = this.team === 'friendly' ? '#0df' : '#f34';
-                const alpha = 0.6 + this.detected * 0.4; // Minimum 60% visibility
+                const alpha = 0.85 + this.detected * 0.15; // Minimum 85% visibility
 
                 context.save();
                 context.translate(this.x, this.y);
