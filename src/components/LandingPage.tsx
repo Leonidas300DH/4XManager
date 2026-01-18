@@ -58,22 +58,40 @@ const LandingPage: React.FC<LandingPageProps> = ({
     // MUSIC
     // ══════════════════════════════════════════════════════════════
     useEffect(() => {
-        audioRef.current = new Audio('/Dark Signal Drift.mp3');
-        if (audioRef.current) {
-            audioRef.current.loop = true;
-            audioRef.current.volume = 0.2; // Not too loud
-            // Note: Autoplay might be blocked by browsers until user interaction
-            const playAudio = () => {
-                audioRef.current?.play().catch(e => console.log('Audio playback blocked until interaction', e));
-                document.removeEventListener('click', playAudio);
-            };
-            document.addEventListener('click', playAudio);
-        }
+        const audio = new Audio('/Dark Signal Drift.mp3');
+        audio.loop = true;
+        audio.volume = 0.2;
+        audioRef.current = audio;
+
+        let started = false;
+        const tryPlay = () => {
+            if (started) return;
+            audio.play().then(() => {
+                started = true;
+                // Remove all listeners once playing
+                document.removeEventListener('click', tryPlay);
+                document.removeEventListener('keydown', tryPlay);
+                document.removeEventListener('touchstart', tryPlay);
+            }).catch(() => {
+                // Autoplay blocked, wait for interaction
+            });
+        };
+
+        // Try immediately
+        tryPlay();
+
+        // Also listen for user interactions
+        document.addEventListener('click', tryPlay);
+        document.addEventListener('keydown', tryPlay);
+        document.addEventListener('touchstart', tryPlay);
+
         return () => {
-            if (audioRef.current) {
-                audioRef.current.pause();
-                audioRef.current = null;
-            }
+            audio.pause();
+            audio.src = '';
+            audioRef.current = null;
+            document.removeEventListener('click', tryPlay);
+            document.removeEventListener('keydown', tryPlay);
+            document.removeEventListener('touchstart', tryPlay);
         };
     }, []);
 
