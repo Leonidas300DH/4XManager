@@ -55,43 +55,25 @@ const LandingPage: React.FC<LandingPageProps> = ({
     }, []);
 
     // ══════════════════════════════════════════════════════════════
-    // MUSIC
+    // MUSIC - Using ref to control HTML audio element
     // ══════════════════════════════════════════════════════════════
     useEffect(() => {
-        const audio = new Audio('/Dark Signal Drift.mp3');
-        audio.loop = true;
-        audio.volume = 0.2;
-        audioRef.current = audio;
-
-        let started = false;
-        const tryPlay = () => {
-            if (started) return;
-            audio.play().then(() => {
-                started = true;
-                // Remove all listeners once playing
-                document.removeEventListener('click', tryPlay);
-                document.removeEventListener('keydown', tryPlay);
-                document.removeEventListener('touchstart', tryPlay);
-            }).catch(() => {
-                // Autoplay blocked, wait for interaction
+        if (audioRef.current) {
+            audioRef.current.volume = 0.2; // 20% volume
+            // Attempt to play on mount (autoPlay should handle this, but as backup)
+            audioRef.current.play().catch(() => {
+                // Autoplay blocked - add click listener as fallback
+                const tryPlay = () => {
+                    audioRef.current?.play();
+                    document.removeEventListener('click', tryPlay);
+                };
+                document.addEventListener('click', tryPlay);
             });
-        };
-
-        // Try immediately
-        tryPlay();
-
-        // Also listen for user interactions
-        document.addEventListener('click', tryPlay);
-        document.addEventListener('keydown', tryPlay);
-        document.addEventListener('touchstart', tryPlay);
-
+        }
         return () => {
-            audio.pause();
-            audio.src = '';
-            audioRef.current = null;
-            document.removeEventListener('click', tryPlay);
-            document.removeEventListener('keydown', tryPlay);
-            document.removeEventListener('touchstart', tryPlay);
+            if (audioRef.current) {
+                audioRef.current.pause();
+            }
         };
     }, []);
 
@@ -222,8 +204,14 @@ const LandingPage: React.FC<LandingPageProps> = ({
         const ships: Ship[] = [];
 
         const initRadar = () => {
-            width = canvas.parentElement?.clientWidth || window.innerWidth;
-            height = canvas.parentElement?.clientHeight || window.innerHeight;
+            const rect = canvas.parentElement?.getBoundingClientRect();
+            width = rect?.width || window.innerWidth;
+            height = rect?.height || window.innerHeight;
+
+            // Ensure minimum dimensions
+            if (width < 100) width = window.innerWidth * 0.7;
+            if (height < 100) height = window.innerHeight * 0.6;
+
             canvas.width = width;
             canvas.height = height;
 
@@ -383,8 +371,11 @@ const LandingPage: React.FC<LandingPageProps> = ({
             animationFrameId = requestAnimationFrame(animate);
         };
 
-        initRadar();
-        animate();
+        // Small delay to ensure layout is complete on iOS
+        setTimeout(() => {
+            initRadar();
+            animate();
+        }, 100);
 
         window.addEventListener('resize', initRadar);
         return () => {
@@ -567,6 +558,14 @@ const LandingPage: React.FC<LandingPageProps> = ({
                     <span>SECTOR ORION-7</span>
                 </footer>
             </div>
+            {/* Background Music - autoPlay attempts to play on load */}
+            <audio
+                ref={audioRef}
+                src="/landing-music.mp3"
+                loop
+                autoPlay
+                style={{ display: 'none' }}
+            />
         </div>
     );
 };
