@@ -284,12 +284,16 @@ const LandingPage: React.FC<LandingPageProps> = ({
 
             ships.length = 0;
 
-            // FRIENDLY FLEET - Reduced big ships (1/3)
+            // FRIENDLY FLEET (Blue): 1 capital + 5 cruisers
             const vanguard = new Ship('capital', 'friendly', cx - r * 0.6, cy + r * 0.3);
             ships.push(vanguard);
 
-            // Cruiser (1 only)
-            ships.push(new Ship('cruiser', 'friendly', cx - r * 0.8, cy + r * 0.2));
+            // 5 Cruisers
+            ships.push(new Ship('cruiser', 'friendly', cx - r * 0.8, cy));
+            ships.push(new Ship('cruiser', 'friendly', cx - r * 0.7, cy + r * 0.5));
+            ships.push(new Ship('cruiser', 'friendly', cx - r * 0.9, cy + r * 0.2));
+            ships.push(new Ship('cruiser', 'friendly', cx - r * 0.5, cy + r * 0.6));
+            ships.push(new Ship('cruiser', 'friendly', cx - r * 0.4, cy + r * 0.1));
 
             // Fighter Squadrons (groups of 3: 1 leader + 2 wingmen)
             const wingOffsets = [
@@ -310,12 +314,16 @@ const LandingPage: React.FC<LandingPageProps> = ({
                 });
             });
 
-            // HOSTILE FLEET - Reduced big ships (1/3)
+            // HOSTILE FLEET (Red): 2 capitals + 3 cruisers
             const nemesis = new Ship('capital', 'hostile', cx + r * 0.6, cy - r * 0.3);
+            const destroyer = new Ship('capital', 'hostile', cx + r * 0.4, cy - r * 0.6);
             ships.push(nemesis);
+            ships.push(destroyer);
 
-            // Cruiser (1 only)
-            ships.push(new Ship('cruiser', 'hostile', cx + r * 0.8, cy - r * 0.3));
+            // 3 Cruisers
+            ships.push(new Ship('cruiser', 'hostile', cx + r * 0.8, cy - r * 0.1));
+            ships.push(new Ship('cruiser', 'hostile', cx + r * 0.7, cy - r * 0.5));
+            ships.push(new Ship('cruiser', 'hostile', cx + r * 0.5, cy - r * 0.4));
 
             // Hostile Fighter Squadrons (groups of 3)
             const hostileSquadronLeaders = [
