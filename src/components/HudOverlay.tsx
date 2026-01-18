@@ -37,37 +37,45 @@ const HudOverlay: React.FC<HudOverlayProps> = ({ enabled, imgSrc, children, isPl
 
     const startTime = useRef(Date.now());
 
-    // Layout variation
+    // Layout variation - NO top-left corner, distribute across other positions
     const layoutStyle = useMemo(() => {
-        const rnd = () => (Math.floor(Math.random() * 40) - 20) + 'px';
         const topPad = isPlanet ? '80px' : '15px';
         const variants = [
-            { // 0: Default
-                status: { top: topPad, left: '15px' },
-                data: { top: topPad, right: '15px', textAlign: 'right' as const },
+            { // 0: Top-right, bottom-left, bottom-right, middle sides
+                status: { top: topPad, right: '15px', textAlign: 'right' as const },
+                data: { bottom: '15px', left: '15px', textAlign: 'left' as const },
                 log: { bottom: '15px', right: '15px' },
-                satLog1: { top: `calc(${topPad} + 30px)`, right: '15px', opacity: 0.6 },
-                satLog2: { top: '45%', left: '15px', opacity: 0.4 },
-                hex: { bottom: '15px', left: '15px' },
-                signal: { bottom: `calc(18px + ${rnd()})`, left: `calc(160px + ${rnd()})` }
+                satLog1: { top: '50%', left: '15px', transform: 'translateY(-50%)', opacity: 0.5 },
+                satLog2: { top: '50%', right: '15px', transform: 'translateY(-50%)', textAlign: 'right' as const, opacity: 0.4 },
+                hex: { bottom: '60px', left: '50%', transform: 'translateX(-50%)' },
+                signal: { top: topPad, left: '50%', transform: 'translateX(-50%)' }
             },
-            { // 1: Inverted
-                status: { top: topPad, right: '15px' },
-                data: { top: topPad, left: '15px', textAlign: 'left' as const },
+            { // 1: Bottom-heavy with top center
+                status: { top: topPad, left: '50%', transform: 'translateX(-50%)', textAlign: 'center' as const },
+                data: { bottom: '15px', right: '15px', textAlign: 'right' as const },
                 log: { bottom: '15px', left: '15px' },
-                satLog1: { top: `calc(${topPad} + 30px)`, left: '15px', opacity: 0.6 },
-                satLog2: { top: '45%', right: '15px', opacity: 0.4, textAlign: 'right' as const },
-                hex: { bottom: '15px', right: '15px' },
-                signal: { bottom: `calc(18px + ${rnd()})`, right: `calc(160px + ${rnd()})` }
+                satLog1: { top: '50%', right: '15px', transform: 'translateY(-50%)', textAlign: 'right' as const, opacity: 0.5 },
+                satLog2: { bottom: '80px', left: '50%', transform: 'translateX(-50%)', textAlign: 'center' as const, opacity: 0.4 },
+                hex: { top: topPad, right: '15px' },
+                signal: { bottom: '15px', left: '50%', transform: 'translateX(-50%)' }
             },
-            { // 2: High Compact
-                status: { top: topPad, left: '15px' },
-                data: { top: `calc(${topPad} + 25px)`, left: '15px', textAlign: 'left' as const }, // data slightly below status in compact
+            { // 2: Sides focused
+                status: { top: '30%', right: '15px', textAlign: 'right' as const },
+                data: { top: '30%', left: '15px', textAlign: 'left' as const },
                 log: { bottom: '15px', right: '15px' },
-                satLog1: { top: `calc(${topPad} + 50px)`, right: '150px', opacity: 0.5 },
-                satLog2: { bottom: '60px', left: '15px', opacity: 0.4 },
-                hex: { bottom: '40px', right: '15px' },
-                signal: { top: `calc(${topPad} + 20px)`, left: `calc(160px + ${rnd()})` }
+                satLog1: { bottom: '15px', left: '15px', opacity: 0.6 },
+                satLog2: { top: topPad, right: '15px', textAlign: 'right' as const, opacity: 0.4 },
+                hex: { bottom: '15px', left: '50%', transform: 'translateX(-50%)' },
+                signal: { top: topPad, left: '50%', transform: 'translateX(-50%)' }
+            },
+            { // 3: Bottom corners + top-middle + side middle
+                status: { top: topPad, left: '50%', transform: 'translateX(-50%)', textAlign: 'center' as const },
+                data: { bottom: '15px', left: '15px', textAlign: 'left' as const },
+                log: { bottom: '15px', right: '15px' },
+                satLog1: { top: '45%', left: '15px', opacity: 0.5 },
+                satLog2: { top: '45%', right: '15px', textAlign: 'right' as const, opacity: 0.5 },
+                hex: { top: topPad, right: '15px' },
+                signal: { bottom: '60px', left: '50%', transform: 'translateX(-50%)' }
             }
         ];
         return variants[Math.floor(Math.random() * variants.length)];
