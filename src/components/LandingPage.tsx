@@ -450,19 +450,25 @@ const LandingPage: React.FC<LandingPageProps> = ({
             }
         };
 
-        // Load random background image from 4 options
-        const bgImages = ['/radar-bg.jpg', '/radar-bg-2.jpg', '/radar-bg-3.jpg', '/radar-bg-4.jpg'];
-        const randomBg = bgImages[Math.floor(Math.random() * bgImages.length)];
-        const bgImage = new Image();
-        bgImage.src = randomBg;
-        let bgLoaded = false;
-        bgImage.onload = () => { bgLoaded = true; };
+        // Load video background (muted, looping)
+        const bgVideo = document.createElement('video');
+        bgVideo.src = '/radar-bg.mp4';
+        bgVideo.muted = true;
+        bgVideo.loop = true;
+        bgVideo.playsInline = true;
+        let videoReady = false;
+        bgVideo.oncanplay = () => {
+            videoReady = true;
+            bgVideo.playbackRate = 0.5; // 50% speed
+            bgVideo.play().catch(() => { });
+        };
+        bgVideo.load();
 
         const animate = () => {
-            // Draw background image if loaded
-            if (bgLoaded) {
-                ctx.drawImage(bgImage, 0, 0, width, height);
-                // Add semi-transparent dark overlay (80% opacity = 20% visible)
+            // Draw video frame as background
+            if (videoReady && bgVideo.readyState >= 2) {
+                ctx.drawImage(bgVideo, 0, 0, width, height);
+                // Add semi-transparent dark overlay
                 ctx.fillStyle = 'rgba(0, 4, 5, 0.2)';
                 ctx.fillRect(0, 0, width, height);
             } else {
