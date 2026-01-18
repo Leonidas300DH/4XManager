@@ -122,7 +122,7 @@ const LandingPage: React.FC<LandingPageProps> = ({
                     this.speed = 0.0275; // +10%
                 } else {
                     this.size = 3;
-                    this.speed = 0.10; // +25%
+                    this.speed = 0.125; // +50% total
                 }
             }
 
