@@ -102,27 +102,29 @@ const LandingPage: React.FC<LandingPageProps> = ({
             size: number;
             speed: number;
             name?: string;
+            straightRunTimer: number; // Timer for straight-line phases
 
             constructor(type: 'capital' | 'cruiser' | 'fighter', team: 'friendly' | 'hostile', x: number, y: number, leader: Ship | null = null, offset: { x: number; y: number } | null = null) {
                 this.type = type;
                 this.team = team;
                 this.x = x;
                 this.y = y;
-                this.angle = team === 'friendly' ? 0.5 : 2.5;
+                this.angle = team === 'friendly' ? 0.5 + Math.random() * 0.5 : 2.5 + Math.random() * 0.5;
                 this.leader = leader;
                 this.offset = offset;
                 this.detected = 0;
+                this.straightRunTimer = Math.random() * 180; // Random initial phase (0-3 sec at 60fps)
 
                 if (type === 'capital') {
                     this.size = 18;
-                    this.speed = 0.0165; // +10%
+                    this.speed = 0.0165;
                     this.name = team === 'friendly' ? 'ISS VANGUARD' : 'HSS NEMESIS';
                 } else if (type === 'cruiser') {
                     this.size = 10;
-                    this.speed = 0.0275; // +10%
+                    this.speed = 0.0275;
                 } else {
                     this.size = 3;
-                    this.speed = 0.25; // Doubled
+                    this.speed = 0.25;
                 }
             }
 
@@ -139,53 +141,62 @@ const LandingPage: React.FC<LandingPageProps> = ({
                     this.y += (ty - this.y) * 0.08;
                     this.angle = this.leader.angle;
                 } else {
-                    // Independent ship - dogfight behavior
+                    // Independent ship - dogfight behavior with straight-run phases
 
-                    // Find nearest enemy
-                    let nearestEnemy: Ship | null = null;
-                    let nearestDist = Infinity;
-                    allShips.forEach(other => {
-                        if (other.team !== this.team && !other.leader) {
-                            const dx = other.x - this.x;
-                            const dy = other.y - this.y;
-                            const d = Math.sqrt(dx * dx + dy * dy);
-                            if (d < nearestDist && d < 150) { // Engagement range
-                                nearestDist = d;
-                                nearestEnemy = other;
+                    // Update straight run timer (120-180 frames = 2-3 sec at 60fps)
+                    this.straightRunTimer--;
+                    const isStraightRun = this.straightRunTimer > 0;
+                    if (this.straightRunTimer <= -120) {
+                        // Start new straight run phase
+                        this.straightRunTimer = 120 + Math.random() * 60;
+                    }
+
+                    if (!isStraightRun) {
+                        // Maneuvering phase - find and engage enemies
+                        let nearestEnemy: Ship | null = null;
+                        let nearestDist = Infinity;
+                        allShips.forEach(other => {
+                            if (other.team !== this.team && !other.leader) {
+                                const dx = other.x - this.x;
+                                const dy = other.y - this.y;
+                                const d = Math.sqrt(dx * dx + dy * dy);
+                                if (d < nearestDist && d < 150) {
+                                    nearestDist = d;
+                                    nearestEnemy = other;
+                                }
+                            }
+                        });
+
+                        // Smooth random wandering
+                        this.angle += (Math.random() - 0.5) * 0.015;
+
+                        // Engage enemy if nearby
+                        if (nearestEnemy) {
+                            const enemy = nearestEnemy as Ship;
+                            const angleToEnemy = Math.atan2(enemy.y - this.y, enemy.x - this.x);
+                            let angleDiff = angleToEnemy - this.angle;
+                            while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+                            while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+
+                            const aggression = this.type === 'fighter' ? 0.03 : 0.015;
+                            this.angle += angleDiff * aggression;
+
+                            if (nearestDist < 60) {
+                                this.angle += (Math.random() - 0.5) * 0.06;
                             }
                         }
-                    });
-
-                    // Smooth random wandering
-                    this.angle += (Math.random() - 0.5) * 0.02;
-
-                    // Engage enemy if nearby - turn towards them
-                    if (nearestEnemy) {
-                        const enemy = nearestEnemy as Ship;
-                        const angleToEnemy = Math.atan2(enemy.y - this.y, enemy.x - this.x);
-                        let angleDiff = angleToEnemy - this.angle;
-                        while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
-                        while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
-
-                        // Smooth turn towards enemy (fighters more aggressive)
-                        const aggression = this.type === 'fighter' ? 0.04 : 0.02;
-                        this.angle += angleDiff * aggression;
-
-                        // Add evasive jitter in close combat
-                        if (nearestDist < 60) {
-                            this.angle += (Math.random() - 0.5) * 0.08;
-                        }
                     }
+                    // Straight-run: minimal turning, just edge avoidance
 
                     const dx = this.x - cx;
                     const dy = this.y - cy;
                     const dist = Math.sqrt(dx * dx + dy * dy);
 
-                    // Smooth turn when approaching edge
-                    if (dist > maxR * 0.8) {
+                    // Edge avoidance always active
+                    if (dist > maxR * 0.75) {
                         const angleToCenter = Math.atan2(cy - this.y, cx - this.x);
-                        const edgeFactor = (dist - maxR * 0.8) / (maxR * 0.2);
-                        const turnStrength = Math.min(edgeFactor * 0.06, 0.12);
+                        const edgeFactor = (dist - maxR * 0.75) / (maxR * 0.25);
+                        const turnStrength = Math.min(edgeFactor * 0.08, 0.15);
 
                         let angleDiff = angleToCenter - this.angle;
                         while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
