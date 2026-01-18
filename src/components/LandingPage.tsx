@@ -220,32 +220,73 @@ const LandingPage: React.FC<LandingPageProps> = ({
             const r = Math.min(width, height) * 0.25;
 
             ships.length = 0;
+
+            // FRIENDLY FLEET - Double ships
             const vanguard = new Ship('capital', 'friendly', cx - r * 0.6, cy + r * 0.3);
+            const titan = new Ship('capital', 'friendly', cx - r * 0.3, cy + r * 0.6);
             ships.push(vanguard);
+            ships.push(titan);
+
+            // Cruisers (4 now)
             ships.push(new Ship('cruiser', 'friendly', cx - r * 0.8, cy));
             ships.push(new Ship('cruiser', 'friendly', cx - r * 0.7, cy + r * 0.5));
+            ships.push(new Ship('cruiser', 'friendly', cx - r * 0.9, cy + r * 0.2));
+            ships.push(new Ship('cruiser', 'friendly', cx - r * 0.5, cy + r * 0.7));
 
-            const alphaOffsets = [
-                { x: -25, y: -15 }, { x: -25, y: 15 },
-                { x: -45, y: -30 }, { x: -45, y: 30 },
-                { x: -65, y: -45 }, { x: -65, y: 45 }
+            // Fighters - now independent (no leader) so they show speed difference
+            const friendlyFighterPositions = [
+                { x: cx - r * 0.4, y: cy + r * 0.1 },
+                { x: cx - r * 0.5, y: cy + r * 0.2 },
+                { x: cx - r * 0.3, y: cy + r * 0.4 },
+                { x: cx - r * 0.6, y: cy + r * 0.5 },
+                { x: cx - r * 0.7, y: cy + r * 0.3 },
+                { x: cx - r * 0.8, y: cy + r * 0.4 },
+                { x: cx - r * 0.4, y: cy + r * 0.6 },
+                { x: cx - r * 0.2, y: cy + r * 0.3 },
+                { x: cx - r * 0.6, y: cy + r * 0.1 },
+                { x: cx - r * 0.8, y: cy + r * 0.6 },
+                { x: cx - r * 0.3, y: cy + r * 0.2 },
+                { x: cx - r * 0.5, y: cy + r * 0.4 },
             ];
-            alphaOffsets.forEach(off => {
-                ships.push(new Ship('fighter', 'friendly', vanguard.x + off.x, vanguard.y + off.y, vanguard, off));
+            friendlyFighterPositions.forEach(pos => {
+                ships.push(new Ship('fighter', 'friendly', pos.x, pos.y));
             });
 
+            // HOSTILE FLEET - Double ships
             const nemesis = new Ship('capital', 'hostile', cx + r * 0.6, cy - r * 0.3);
+            const destroyer = new Ship('capital', 'hostile', cx + r * 0.3, cy - r * 0.6);
             ships.push(nemesis);
+            ships.push(destroyer);
+
+            // Cruisers (4 now)
             ships.push(new Ship('cruiser', 'hostile', cx + r * 0.8, cy - r * 0.1));
             ships.push(new Ship('cruiser', 'hostile', cx + r * 0.7, cy - r * 0.5));
+            ships.push(new Ship('cruiser', 'hostile', cx + r * 0.9, cy - r * 0.2));
+            ships.push(new Ship('cruiser', 'hostile', cx + r * 0.5, cy - r * 0.7));
 
-            const redOffsets = [
-                { x: 25, y: -12 }, { x: 25, y: 12 },
-                { x: 45, y: -25 }, { x: 45, y: 25 }, { x: 45, y: 0 },
-                { x: 65, y: -38 }, { x: 65, y: 38 }, { x: 65, y: -12 }, { x: 65, y: 12 }
+            // Fighters - independent
+            const hostileFighterPositions = [
+                { x: cx + r * 0.4, y: cy - r * 0.1 },
+                { x: cx + r * 0.5, y: cy - r * 0.2 },
+                { x: cx + r * 0.3, y: cy - r * 0.4 },
+                { x: cx + r * 0.6, y: cy - r * 0.5 },
+                { x: cx + r * 0.7, y: cy - r * 0.3 },
+                { x: cx + r * 0.8, y: cy - r * 0.4 },
+                { x: cx + r * 0.4, y: cy - r * 0.6 },
+                { x: cx + r * 0.2, y: cy - r * 0.3 },
+                { x: cx + r * 0.6, y: cy - r * 0.1 },
+                { x: cx + r * 0.8, y: cy - r * 0.6 },
+                { x: cx + r * 0.3, y: cy - r * 0.2 },
+                { x: cx + r * 0.5, y: cy - r * 0.4 },
+                { x: cx + r * 0.7, y: cy - r * 0.1 },
+                { x: cx + r * 0.4, y: cy - r * 0.5 },
+                { x: cx + r * 0.6, y: cy - r * 0.7 },
+                { x: cx + r * 0.2, y: cy - r * 0.4 },
+                { x: cx + r * 0.5, y: cy - r * 0.6 },
+                { x: cx + r * 0.3, y: cy - r * 0.3 },
             ];
-            redOffsets.forEach(off => {
-                ships.push(new Ship('fighter', 'hostile', nemesis.x + off.x, nemesis.y + off.y, nemesis, off));
+            hostileFighterPositions.forEach(pos => {
+                ships.push(new Ship('fighter', 'hostile', pos.x, pos.y));
             });
         };
 
