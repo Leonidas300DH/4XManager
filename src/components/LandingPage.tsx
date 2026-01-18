@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useMemo } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import './LandingPage.css';
 
 interface LandingPageProps {
@@ -156,47 +156,47 @@ const LandingPage: React.FC<LandingPageProps> = ({
                 this.detected = Math.max(0, this.detected - 0.008);
             }
 
-            draw() {
+            draw(context: CanvasRenderingContext2D) {
                 const col = this.team === 'friendly' ? '#0df' : '#f34';
                 const alpha = 0.2 + this.detected * 0.8;
 
-                ctx.save();
-                ctx.translate(this.x, this.y);
-                ctx.rotate(this.angle);
-                ctx.globalAlpha = alpha;
+                context.save();
+                context.translate(this.x, this.y);
+                context.rotate(this.angle);
+                context.globalAlpha = alpha;
 
-                ctx.beginPath();
+                context.beginPath();
                 if (this.type === 'capital') {
-                    ctx.moveTo(18, 0);
-                    ctx.lineTo(-12, 10);
-                    ctx.lineTo(-6, 0);
-                    ctx.lineTo(-12, -10);
+                    context.moveTo(18, 0);
+                    context.lineTo(-12, 10);
+                    context.lineTo(-6, 0);
+                    context.lineTo(-12, -10);
                 } else if (this.type === 'cruiser') {
-                    ctx.moveTo(10, 0);
-                    ctx.lineTo(-6, 5);
-                    ctx.lineTo(-3, 0);
-                    ctx.lineTo(-6, -5);
+                    context.moveTo(10, 0);
+                    context.lineTo(-6, 5);
+                    context.lineTo(-3, 0);
+                    context.lineTo(-6, -5);
                 } else {
-                    ctx.moveTo(4, 0);
-                    ctx.lineTo(-2, 2);
-                    ctx.lineTo(-2, -2);
+                    context.moveTo(4, 0);
+                    context.lineTo(-2, 2);
+                    context.lineTo(-2, -2);
                 }
-                ctx.closePath();
-                ctx.fillStyle = col;
-                ctx.globalAlpha = alpha * 0.3;
-                ctx.fill();
-                ctx.globalAlpha = alpha;
-                ctx.strokeStyle = col;
-                ctx.lineWidth = 1;
-                ctx.stroke();
-                ctx.restore();
+                context.closePath();
+                context.fillStyle = col;
+                context.globalAlpha = alpha * 0.3;
+                context.fill();
+                context.globalAlpha = alpha;
+                context.strokeStyle = col;
+                context.lineWidth = 1;
+                context.stroke();
+                context.restore();
 
                 if (this.name && this.detected > 0.3) {
-                    ctx.globalAlpha = this.detected * 0.6;
-                    ctx.font = '8px IBM Plex Mono';
-                    ctx.fillStyle = col;
-                    ctx.fillText(this.name, this.x + this.size + 8, this.y + 3);
-                    ctx.globalAlpha = 1;
+                    context.globalAlpha = this.detected * 0.6;
+                    context.font = '8px IBM Plex Mono';
+                    context.fillStyle = col;
+                    context.fillText(this.name, this.x + this.size + 8, this.y + 3);
+                    context.globalAlpha = 1;
                 }
             }
         }
@@ -352,7 +352,7 @@ const LandingPage: React.FC<LandingPageProps> = ({
 
             ships.forEach(ship => {
                 ship.update();
-                ship.draw();
+                ship.draw(ctx);
             });
 
             drawInterference();
