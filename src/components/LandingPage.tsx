@@ -349,9 +349,23 @@ const LandingPage: React.FC<LandingPageProps> = ({
             }
         };
 
+        // Load background image
+        const bgImage = new Image();
+        bgImage.src = '/radar-bg.jpg';
+        let bgLoaded = false;
+        bgImage.onload = () => { bgLoaded = true; };
+
         const animate = () => {
-            // Clear canvas to transparent so background image shows through
-            ctx.clearRect(0, 0, width, height);
+            // Draw background image if loaded
+            if (bgLoaded) {
+                ctx.drawImage(bgImage, 0, 0, width, height);
+                // Add semi-transparent dark overlay (80% opacity = 20% visible)
+                ctx.fillStyle = 'rgba(0, 4, 5, 0.2)';
+                ctx.fillRect(0, 0, width, height);
+            } else {
+                ctx.fillStyle = '#000405';
+                ctx.fillRect(0, 0, width, height);
+            }
 
             drawGrid();
             drawSweep();
