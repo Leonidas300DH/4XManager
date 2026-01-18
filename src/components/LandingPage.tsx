@@ -161,7 +161,8 @@ const LandingPage: React.FC<LandingPageProps> = ({
 
                     // Engage enemy if nearby - turn towards them
                     if (nearestEnemy) {
-                        const angleToEnemy = Math.atan2(nearestEnemy.y - this.y, nearestEnemy.x - this.x);
+                        const enemy = nearestEnemy as Ship;
+                        const angleToEnemy = Math.atan2(enemy.y - this.y, enemy.x - this.x);
                         let angleDiff = angleToEnemy - this.angle;
                         while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
                         while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
