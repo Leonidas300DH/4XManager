@@ -115,14 +115,14 @@ const LandingPage: React.FC<LandingPageProps> = ({
 
                 if (type === 'capital') {
                     this.size = 18;
-                    this.speed = 0.015;
+                    this.speed = 0.0165; // +10%
                     this.name = team === 'friendly' ? 'ISS VANGUARD' : 'HSS NEMESIS';
                 } else if (type === 'cruiser') {
                     this.size = 10;
-                    this.speed = 0.025;
+                    this.speed = 0.0275; // +10%
                 } else {
                     this.size = 3;
-                    this.speed = 0.08;
+                    this.speed = 0.10; // +25%
                 }
             }
 
