@@ -363,17 +363,20 @@ const LandingPage: React.FC<LandingPageProps> = ({
 
             drawInterference();
 
-            // Update contact count periodically (outside main loop to avoid state spam)
+            animationFrameId = requestAnimationFrame(animate);
+        };
+
+        // Update contacts only occasionally, not every frame
+        const updateContacts = () => {
             const friendly = ships.filter(s => s.team === 'friendly').length;
             const hostile = ships.filter(s => s.team === 'hostile').length;
             setContacts({ friendly, hostile });
-
-            animationFrameId = requestAnimationFrame(animate);
         };
 
         // Small delay to ensure layout is complete on iOS
         setTimeout(() => {
             initRadar();
+            updateContacts();
             animate();
         }, 100);
 
