@@ -178,7 +178,8 @@ const LandingPage: React.FC<LandingPageProps> = ({
                             while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
                             while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
 
-                            const aggression = this.type === 'fighter' ? 0.03 : 0.015;
+                            // Fighters aggressive, capitals very slow, cruisers medium
+                            const aggression = this.type === 'fighter' ? 0.03 : (this.type === 'capital' ? 0.003 : 0.008);
                             this.angle += angleDiff * aggression;
 
                             if (nearestDist < 60) {
@@ -283,17 +284,12 @@ const LandingPage: React.FC<LandingPageProps> = ({
 
             ships.length = 0;
 
-            // FRIENDLY FLEET - Double ships
+            // FRIENDLY FLEET - Reduced big ships (1/3)
             const vanguard = new Ship('capital', 'friendly', cx - r * 0.6, cy + r * 0.3);
-            const titan = new Ship('capital', 'friendly', cx - r * 0.3, cy + r * 0.6);
             ships.push(vanguard);
-            ships.push(titan);
 
-            // Cruisers (4 now)
-            ships.push(new Ship('cruiser', 'friendly', cx - r * 0.8, cy));
-            ships.push(new Ship('cruiser', 'friendly', cx - r * 0.7, cy + r * 0.5));
-            ships.push(new Ship('cruiser', 'friendly', cx - r * 0.9, cy + r * 0.2));
-            ships.push(new Ship('cruiser', 'friendly', cx - r * 0.5, cy + r * 0.7));
+            // Cruiser (1 only)
+            ships.push(new Ship('cruiser', 'friendly', cx - r * 0.8, cy + r * 0.2));
 
             // Fighter Squadrons (groups of 3: 1 leader + 2 wingmen)
             const wingOffsets = [
@@ -314,17 +310,12 @@ const LandingPage: React.FC<LandingPageProps> = ({
                 });
             });
 
-            // HOSTILE FLEET - Double ships
+            // HOSTILE FLEET - Reduced big ships (1/3)
             const nemesis = new Ship('capital', 'hostile', cx + r * 0.6, cy - r * 0.3);
-            const destroyer = new Ship('capital', 'hostile', cx + r * 0.3, cy - r * 0.6);
             ships.push(nemesis);
-            ships.push(destroyer);
 
-            // Cruisers (4 now)
-            ships.push(new Ship('cruiser', 'hostile', cx + r * 0.8, cy - r * 0.1));
-            ships.push(new Ship('cruiser', 'hostile', cx + r * 0.7, cy - r * 0.5));
-            ships.push(new Ship('cruiser', 'hostile', cx + r * 0.9, cy - r * 0.2));
-            ships.push(new Ship('cruiser', 'hostile', cx + r * 0.5, cy - r * 0.7));
+            // Cruiser (1 only)
+            ships.push(new Ship('cruiser', 'hostile', cx + r * 0.8, cy - r * 0.3));
 
             // Hostile Fighter Squadrons (groups of 3)
             const hostileSquadronLeaders = [
