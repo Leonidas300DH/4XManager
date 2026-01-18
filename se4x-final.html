@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Empires 4X - Command</title>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #000608;
+            --blue: #0df;
+            --blue-dim: #0af;
+            --blue-dark: #079;
+            --blue-darker: #056;
+            --text: #0ff;
+            --text-dim: #09b;
+            --green: #0e8;
+            --red: #f34;
+            --orange: #f84;
+            --white: #bff;
+            --border: #068;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'IBM Plex Mono', monospace;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* LAYOUT */
+        .layout {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            grid-template-rows: 50px 1fr 30px;
+            height: 100vh;
+            gap: 1px;
+            background: var(--border);
+        }
+
+        /* HEADER */
+        .header {
+            grid-column: 1 / -1;
+            background: var(--bg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header h1 {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 20px;
+            font-weight: 600;
+            letter-spacing: 6px;
+            color: var(--white);
+        }
+
+        .header-time {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 16px;
+            color: var(--text);
+        }
+
+        /* LEFT PANEL - MENU + COMMS */
+        .panel-left {
+            background: var(--bg);
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--border);
+            overflow: hidden;
+            min-height: 0;
+        }
+
+        .panel-header {
+            padding: 10px 15px;
+            font-size: 9px;
+            letter-spacing: 2px;
+            color: var(--text);
+            border-bottom: 1px solid var(--border);
+            background: rgba(0, 30, 60, 0.5);
+            display: flex;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+
+        .menu-section {
+            flex-shrink: 0;
+            flex-grow: 0;
+        }
+
+        .menu-btn {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 14px 18px;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid var(--blue-dark);
+            border-left: 2px solid transparent;
+            color: var(--text);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 14px;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .menu-btn:hover {
+            background: rgba(0, 200, 255, 0.1);
+            color: var(--white);
+            border-left-color: var(--blue);
+        }
+
+        /* COMMS in left panel - FIXED */
+        .comms-section {
+            flex: 1 1 0; /* Take remaining space but can shrink */
+            display: flex;
+            flex-direction: column;
+            min-height: 0; /* Critical for overflow */
+            overflow: hidden;
+            border-top: 1px solid var(--border);
+        }
+
+        .comms-feed {
+            flex: 1 1 0;
+            overflow-y: scroll;
+            overflow-x: hidden;
+            padding: 8px 10px;
+            display: block; /* Changed from flex to block */
+            min-height: 0;
+        }
+
+        .comms-feed::-webkit-scrollbar { width: 3px; }
+        .comms-feed::-webkit-scrollbar-track { background: transparent; }
+        .comms-feed::-webkit-scrollbar-thumb { background: var(--blue-dark); }
+
+        .comm-msg {
+            font-size: 9px;
+            line-height: 1.35;
+            animation: fadeIn 0.3s ease;
+            margin-bottom: 5px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(3px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .comm-msg .time { color: var(--blue-dark); font-size: 7px; }
+        .comm-msg .sender { color: var(--blue); font-size: 8px; }
+        .comm-msg .text { color: var(--text-dim); margin-left: 4px; }
+
+        .comm-msg.priority .sender { color: var(--orange); }
+        .comm-msg.priority .text { color: var(--white); }
+        .comm-msg.alert .sender { color: var(--red); }
+        .comm-msg.alert .text { color: #fcc; }
+        .comm-msg.system .sender { color: var(--blue-dim); }
+        .comm-msg.system .text { color: var(--blue-dim); font-style: italic; }
+
+        /* CENTER - RADAR */
+        .panel-center {
+            background: #000405;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #radarCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* DATA OVERLAY - top left of radar - DISCREET */
+        .data-overlay {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 8px;
+            color: var(--blue-dark);
+            pointer-events: none;
+            z-index: 20;
+            opacity: 0.6;
+            animation: overlayPulse 8s ease-in-out infinite;
+        }
+
+        @keyframes overlayPulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 0.7; }
+        }
+
+        .data-block {
+            margin-bottom: 8px;
+            padding: 4px 8px;
+            background: rgba(0, 6, 8, 0.3);
+            border-left: 1px solid var(--blue-darker);
+        }
+
+        .data-label {
+            font-size: 7px;
+            color: var(--blue-darker);
+            letter-spacing: 1px;
+            margin-bottom: 2px;
+        }
+
+        .data-value {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 10px;
+            color: var(--blue-dark);
+            animation: dataFlicker 4s ease-in-out infinite;
+        }
+
+        @keyframes dataFlicker {
+            0%, 90%, 100% { opacity: 1; }
+            92% { opacity: 0.7; }
+            94% { opacity: 1; }
+            96% { opacity: 0.8; }
+        }
+
+        .data-value.small {
+            font-size: 9px;
+            color: var(--blue-darker);
+        }
+
+        .data-bar {
+            width: 50px;
+            height: 2px;
+            background: var(--blue-darker);
+            margin-top: 3px;
+        }
+
+        .data-bar-fill {
+            height: 100%;
+            background: var(--blue-dark);
+            transition: width 2s ease;
+        }
+
+        /* BOTTOM DATA OVERLAY */
+        .data-overlay-bottom {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            font-size: 8px;
+            color: var(--blue-dark);
+            pointer-events: none;
+            z-index: 20;
+            opacity: 0.6;
+            text-align: right;
+            animation: overlayPulse 8s ease-in-out infinite;
+            animation-delay: -4s;
+        }
+
+        .data-overlay-bottom .data-block {
+            border-left: none;
+            border-right: 1px solid var(--blue-darker);
+            text-align: right;
+        }
+
+        /* INTERFERENCE OVERLAY */
+        .interference {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 30;
+            opacity: 0;
+            transition: opacity 0.1s;
+        }
+
+        .interference.active {
+            opacity: 1;
+        }
+
+        .interference-line {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: rgba(0, 200, 255, 0.15);
+        }
+
+        /* FOOTER */
+        .footer {
+            grid-column: 1 / -1;
+            background: var(--bg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 15px;
+            font-size: 9px;
+            color: var(--text-dim);
+            border-top: 1px solid var(--border);
+        }
+
+        /* OVERLAYS */
+        .scanlines {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 100;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent 0px,
+                transparent 2px,
+                rgba(0, 10, 20, 0.08) 2px,
+                rgba(0, 10, 20, 0.08) 4px
+            );
+        }
+
+        .vignette {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 99;
+            background: radial-gradient(ellipse at center, transparent 40%, var(--bg) 100%);
+        }
+    </style>
+</head>
+<body>
+    <div class="scanlines"></div>
+    <div class="vignette"></div>
+
+    <div class="layout">
+        <!-- HEADER -->
+        <header class="header">
+            <h1>SPACE EMPIRES 4X</h1>
+            <div class="header-time" id="clock">00:00:00</div>
+        </header>
+
+        <!-- LEFT - MENU + COMMS -->
+        <aside class="panel-left">
+            <div class="panel-header">COMMAND MENU</div>
+            <div class="menu-section">
+                <button class="menu-btn">NEW GAME</button>
+                <button class="menu-btn" disabled style="opacity:0.4">CONTINUE</button>
+                <button class="menu-btn">LOAD GAME</button>
+                <button class="menu-btn">SETTINGS</button>
+                <button class="menu-btn" style="color:var(--red)">QUIT</button>
+            </div>
+            <div class="comms-section">
+                <div class="panel-header">
+                    <span>TACTICAL CHANNEL</span>
+                    <span style="color:var(--green);">● LIVE</span>
+                </div>
+                <div class="comms-feed" id="commsFeed"></div>
+            </div>
+        </aside>
+
+        <!-- CENTER - RADAR -->
+        <main class="panel-center">
+            <canvas id="radarCanvas"></canvas>
+            
+            <!-- DATA OVERLAY TOP LEFT - discreet -->
+            <div class="data-overlay" id="dataOverlayTop">
+                <div class="data-block">
+                    <div class="data-label">SECTOR</div>
+                    <div class="data-value" id="dataSector">ORION-7</div>
+                </div>
+                <div class="data-block">
+                    <div class="data-label">GRID</div>
+                    <div class="data-value small" id="dataCoords">-2847.15, 1204.84</div>
+                </div>
+                <div class="data-block">
+                    <div class="data-label">SIGNAL</div>
+                    <div class="data-bar"><div class="data-bar-fill" id="signalBar" style="width:80%"></div></div>
+                </div>
+            </div>
+
+            <!-- DATA OVERLAY BOTTOM RIGHT - discreet -->
+            <div class="data-overlay-bottom" id="dataOverlayBottom">
+                <div class="data-block">
+                    <div class="data-label">CONTACTS</div>
+                    <div class="data-value" id="dataContacts">0 / 0</div>
+                </div>
+                <div class="data-block">
+                    <div class="data-label">RANGE</div>
+                    <div class="data-value small" id="dataRange">12,000 KM</div>
+                </div>
+                <div class="data-block">
+                    <div class="data-label">BEARING</div>
+                    <div class="data-value small" id="dataBearing">047°</div>
+                </div>
+            </div>
+
+            <!-- INTERFERENCE OVERLAY -->
+            <div class="interference" id="interference"></div>
+        </main>
+
+        <!-- FOOTER -->
+        <footer class="footer">
+            <span>TERMINAL: ADMIRAL-01</span>
+            <span>SECTOR ORION-7</span>
+        </footer>
+    </div>
+
+    <script>
+        // ══════════════════════════════════════════════════════════════
+        // CLOCK
+        // ══════════════════════════════════════════════════════════════
+        function updateClock() {
+            document.getElementById('clock').textContent = new Date().toTimeString().slice(0, 8);
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // ══════════════════════════════════════════════════════════════
+        // DATA OVERLAY ANIMATION
+        // ══════════════════════════════════════════════════════════════
+        const dataCoords = document.getElementById('dataCoords');
+        const dataContacts = document.getElementById('dataContacts');
+        const dataBearing = document.getElementById('dataBearing');
+        const signalBar = document.getElementById('signalBar');
+
+        let coordX = -2847.15;
+        let coordY = 1204.84;
+        let bearing = 47;
+
+        function updateData() {
+            // Slowly drift coordinates
+            coordX += (Math.random() - 0.5) * 0.05;
+            coordY += (Math.random() - 0.5) * 0.05;
+            dataCoords.textContent = `${coordX.toFixed(2)}, ${coordY.toFixed(2)}`;
+
+            // Update bearing
+            bearing += (Math.random() - 0.5) * 2;
+            if (bearing < 0) bearing += 360;
+            if (bearing > 360) bearing -= 360;
+            dataBearing.textContent = `${Math.floor(bearing)}°`;
+
+            // Update signal bar
+            signalBar.style.width = (70 + Math.random() * 20) + '%';
+        }
+
+        setInterval(updateData, 2000);
+
+        function updateContactCount() {
+            const friendly = ships.filter(s => s.team === 'friendly').length;
+            const hostile = ships.filter(s => s.team === 'hostile').length;
+            dataContacts.innerHTML = `<span style="color:#0df">${friendly}</span> / <span style="color:#f34">${hostile}</span>`;
+        }
+
+        // ══════════════════════════════════════════════════════════════
+        // INTERFERENCE
+        // ══════════════════════════════════════════════════════════════
+        const interferenceEl = document.getElementById('interference');
+
+        function triggerInterference() {
+            // Create random interference lines
+            interferenceEl.innerHTML = '';
+            const numLines = 2 + Math.floor(Math.random() * 4);
+            
+            for (let i = 0; i < numLines; i++) {
+                const line = document.createElement('div');
+                line.className = 'interference-line';
+                line.style.top = Math.random() * 100 + '%';
+                line.style.height = (1 + Math.random() * 2) + 'px';
+                line.style.opacity = 0.1 + Math.random() * 0.2;
+                interferenceEl.appendChild(line);
+            }
+
+            interferenceEl.classList.add('active');
+            
+            setTimeout(() => {
+                interferenceEl.classList.remove('active');
+            }, 100 + Math.random() * 150);
+
+            // Schedule next interference
+            setTimeout(triggerInterference, 4000 + Math.random() * 8000);
+        }
+
+        setTimeout(triggerInterference, 2000);
+
+        // ══════════════════════════════════════════════════════════════
+        // BATTLE COMMUNICATIONS
+        // ══════════════════════════════════════════════════════════════
+        const commsFeed = document.getElementById('commsFeed');
+
+        function addComm(sender, text, type = '') {
+            const msg = document.createElement('div');
+            msg.className = 'comm-msg ' + type;
+            const time = new Date().toTimeString().slice(0, 8);
+            msg.innerHTML = `<span class="time">[${time}]</span> <span class="sender">${sender}:</span><span class="text">${text}</span>`;
+            commsFeed.appendChild(msg);
+            commsFeed.scrollTop = commsFeed.scrollHeight;
+
+            // Keep max 30 messages to prevent layout issues
+            while (commsFeed.children.length > 30) {
+                commsFeed.removeChild(commsFeed.firstChild);
+            }
+        }
+
+        // Initial script - faster (15% speedup)
+        const script = [
+            { delay: 0, sender: 'SYSTEM', text: '━━ CHANNEL OPEN ━━', type: 'system' },
+            { delay: 700, sender: 'VANGUARD CIC', text: 'All stations, report status.', type: 'system' },
+            { delay: 1700, sender: 'TACTICAL', text: 'Sensors online. Scanning.', type: '' },
+            { delay: 2700, sender: 'WEAPONS', text: 'All batteries ready.', type: '' },
+            { delay: 3700, sender: 'ALPHA LEAD', text: 'Alpha Squadron in formation.', type: '' },
+            { delay: 4800, sender: 'SENSORS', text: 'Contact! Multiple signatures bearing 047.', type: 'priority' },
+            { delay: 6000, sender: 'TACTICAL', text: 'Hostile fleet confirmed. Designating Sierra.', type: 'priority' },
+            { delay: 7200, sender: 'VANGUARD CIC', text: 'Set Condition One.', type: 'alert' },
+            { delay: 8500, sender: 'TACTICAL', text: 'Enemy capital identified: HSS NEMESIS.', type: 'priority' },
+            { delay: 9800, sender: 'ALPHA LEAD', text: 'Bandits launching! Count nine.', type: 'alert' },
+            { delay: 11000, sender: 'VANGUARD ACTUAL', text: 'All units, weapons free.', type: 'alert' },
+        ];
+
+        // Battle chatter - expanded list (loops continuously)
+        const chatter = [
+            { sender: 'ALPHA-2', text: 'Engaging bandit, bearing 090.', type: '' },
+            { sender: 'ALPHA-3', text: 'Fox two away.', type: '' },
+            { sender: 'TACTICAL', text: 'Tracking inbound ordnance.', type: 'priority' },
+            { sender: 'ALPHA LEAD', text: 'Alpha flight, stay tight.', type: '' },
+            { sender: 'WEAPONS', text: 'Main battery, firing.', type: '' },
+            { sender: 'ALPHA-4', text: 'Splash one!', type: '' },
+            { sender: 'SENSORS', text: 'Enemy cruiser maneuvering.', type: '' },
+            { sender: 'DAMAGE CTRL', text: 'Hit starboard section. Contained.', type: 'priority' },
+            { sender: 'IRON DUKE', text: 'Engaging Ravager.', type: '' },
+            { sender: 'ALPHA-2', text: 'Two on my six!', type: 'priority' },
+            { sender: 'ALPHA LEAD', text: 'I see them. Engaging.', type: '' },
+            { sender: 'TACTICAL', text: 'Enemy firing solution on Vanguard.', type: 'alert' },
+            { sender: 'HELM', text: 'Evasive maneuvers.', type: '' },
+            { sender: 'WEAPONS', text: 'Point defense active.', type: '' },
+            { sender: 'RESOLUTE', text: 'Moving to intercept.', type: '' },
+            { sender: 'ALPHA-3', text: 'Good hit on Desolator.', type: '' },
+            { sender: 'SENSORS', text: 'Sierra-1 shields failing.', type: 'priority' },
+            { sender: 'VANGUARD CIC', text: 'Focus fire on Nemesis.', type: 'priority' },
+            { sender: 'ALPHA-5', text: 'Copy. Attack run.', type: '' },
+            { sender: 'DAMAGE CTRL', text: 'Hull breach deck 4. Sealing.', type: 'alert' },
+            { sender: 'TACTICAL', text: 'Nemesis turning to engage.', type: 'priority' },
+            { sender: 'ALPHA LEAD', text: 'Watch your crossfire.', type: '' },
+            { sender: 'WEAPONS', text: 'Torpedoes loaded.', type: '' },
+            { sender: 'SENSORS', text: 'Enemy fighter down.', type: '' },
+            { sender: 'ALPHA-2', text: 'Clear. Returning to formation.', type: '' },
+            { sender: 'TACTICAL', text: 'Ravager taking heavy damage.', type: 'priority' },
+            { sender: 'IRON DUKE', text: 'Confirmed hits.', type: '' },
+            { sender: 'VANGUARD ACTUAL', text: 'Maintain pressure.', type: 'alert' },
+            { sender: 'ENGINEERING', text: 'Reactor stable. Power nominal.', type: '' },
+            { sender: 'ALPHA-6', text: 'Bandit on my tail!', type: 'priority' },
+            { sender: 'ALPHA-3', text: 'I got him. Break right.', type: '' },
+            { sender: 'SENSORS', text: 'New contact bearing 270.', type: 'priority' },
+            { sender: 'TACTICAL', text: 'Negative, sensor ghost.', type: '' },
+            { sender: 'WEAPONS', text: 'Reloading tubes 1 through 4.', type: '' },
+            { sender: 'VANGUARD CIC', text: 'Status report all stations.', type: 'system' },
+            { sender: 'ALPHA LEAD', text: 'Alpha flight, 4 remaining.', type: '' },
+            { sender: 'DAMAGE CTRL', text: 'Fires contained deck 7.', type: '' },
+            { sender: 'HELM', text: 'Holding position.', type: '' },
+            { sender: 'TACTICAL', text: 'Desolator withdrawing.', type: 'priority' },
+            { sender: 'ALPHA-4', text: 'Pursuing.', type: '' },
+            { sender: 'ALPHA LEAD', text: 'Negative Alpha-4. Hold formation.', type: '' },
+            { sender: 'SENSORS', text: 'Nemesis shields at 40%.', type: 'priority' },
+            { sender: 'WEAPONS', text: 'Firing solution locked.', type: '' },
+            { sender: 'VANGUARD ACTUAL', text: 'All batteries, fire.', type: 'alert' },
+            { sender: 'TACTICAL', text: 'Direct hit on Nemesis.', type: 'priority' },
+            { sender: 'SENSORS', text: 'Enemy power fluctuations.', type: '' },
+            { sender: 'ALPHA-2', text: 'They are hurting.', type: '' },
+            { sender: 'IRON DUKE', text: 'Ravager dead in space.', type: 'priority' },
+            { sender: 'VANGUARD CIC', text: 'Confirmed kill Ravager.', type: 'alert' },
+            { sender: 'ALPHA LEAD', text: 'Good shooting Iron Duke.', type: '' },
+            { sender: 'TACTICAL', text: 'Nemesis coming about.', type: 'priority' },
+            { sender: 'HELM', text: 'Adjusting heading.', type: '' },
+            { sender: 'ENGINEERING', text: 'Port thruster at 80%.', type: '' },
+            { sender: 'WEAPONS', text: 'Standing by.', type: '' },
+            { sender: 'SENSORS', text: 'Enemy fighters regrouping.', type: '' },
+            { sender: 'ALPHA-5', text: 'I count six bandits.', type: '' },
+            { sender: 'ALPHA LEAD', text: 'Copy. Engaging.', type: '' },
+            // Additional messages for variety
+            { sender: 'COMMS', text: 'Signal interference detected.', type: '' },
+            { sender: 'TACTICAL', text: 'Adjusting firing parameters.', type: '' },
+            { sender: 'ALPHA-3', text: 'Missile away.', type: '' },
+            { sender: 'SENSORS', text: 'Hostile cruiser changing course.', type: '' },
+            { sender: 'VANGUARD CIC', text: 'Coordinate with Iron Duke.', type: 'system' },
+            { sender: 'HELM', text: 'Coming to new heading 045.', type: '' },
+            { sender: 'WEAPONS', text: 'Secondary batteries online.', type: '' },
+            { sender: 'ALPHA-2', text: 'Breaking formation. Engaging target.', type: '' },
+            { sender: 'DAMAGE CTRL', text: 'Section 12 secured.', type: '' },
+            { sender: 'TACTICAL', text: 'Multiple targets. Prioritizing.', type: 'priority' },
+            { sender: 'ENGINEERING', text: 'Power rerouted to shields.', type: '' },
+            { sender: 'ALPHA LEAD', text: 'Reform on my wing.', type: '' },
+            { sender: 'SENSORS', text: 'Nemesis launching missiles.', type: 'alert' },
+            { sender: 'WEAPONS', text: 'Countermeasures deployed.', type: '' },
+            { sender: 'HELM', text: 'Hard to port!', type: 'priority' },
+            { sender: 'VANGUARD ACTUAL', text: 'Hold the line.', type: 'alert' },
+            { sender: 'ALPHA-4', text: 'Target locked.', type: '' },
+            { sender: 'TACTICAL', text: 'Impact in 10 seconds.', type: 'priority' },
+            { sender: 'DAMAGE CTRL', text: 'Brace for impact!', type: 'alert' },
+            { sender: 'SENSORS', text: 'Missiles intercepted.', type: '' },
+            { sender: 'WEAPONS', text: 'Good kill on inbound.', type: '' },
+            { sender: 'VANGUARD CIC', text: 'Continue engagement.', type: 'system' },
+            { sender: 'ALPHA-6', text: 'Returning to formation.', type: '' },
+            { sender: 'IRON DUKE', text: 'Moving to flank position.', type: '' },
+            { sender: 'TACTICAL', text: 'Enemy squadron scattered.', type: 'priority' },
+            { sender: 'ALPHA LEAD', text: 'Press the attack.', type: '' },
+            { sender: 'SENSORS', text: 'Desolator shields critical.', type: 'priority' },
+            { sender: 'WEAPONS', text: 'Locking on Desolator.', type: '' },
+            { sender: 'VANGUARD ACTUAL', text: 'Finish them.', type: 'alert' },
+        ];
+
+        let chatterIndex = 0;
+
+        // Play initial script
+        let scriptIndex = 0;
+        function playScript() {
+            if (scriptIndex < script.length) {
+                const item = script[scriptIndex];
+                setTimeout(() => {
+                    addComm(item.sender, item.text, item.type);
+                    scriptIndex++;
+                    playScript();
+                }, item.delay);
+            } else {
+                // Start ongoing chatter - loops continuously
+                startChatter();
+            }
+        }
+
+        function startChatter() {
+            function nextMsg() {
+                const msg = chatter[chatterIndex % chatter.length];
+                addComm(msg.sender, msg.text, msg.type);
+                chatterIndex++;
+                // 1.2 to 3 seconds (faster)
+                setTimeout(nextMsg, 1200 + Math.random() * 1800);
+            }
+            nextMsg();
+        }
+
+        playScript();
+
+        // ══════════════════════════════════════════════════════════════
+        // RADAR
+        // ══════════════════════════════════════════════════════════════
+        const canvas = document.getElementById('radarCanvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+
+        const ships = [];
+        let scanAngle = 0;
+
+        class Ship {
+            constructor(type, team, x, y, leader = null, offset = null) {
+                this.type = type;
+                this.team = team;
+                this.x = x;
+                this.y = y;
+                this.angle = team === 'friendly' ? 0.5 : 2.5;
+                this.leader = leader;
+                this.offset = offset;
+                this.detected = 0;
+                
+                if (type === 'capital') {
+                    this.size = 18;
+                    this.speed = 0.015;
+                    this.name = team === 'friendly' ? 'ISS VANGUARD' : 'HSS NEMESIS';
+                } else if (type === 'cruiser') {
+                    this.size = 10;
+                    this.speed = 0.025;
+                } else {
+                    this.size = 3;
+                    this.speed = 0.08;
+                }
+            }
+
+            update() {
+                const cx = width / 2;
+                const cy = height / 2;
+                const maxR = Math.min(width, height) * 0.35;
+
+                if (this.leader && this.offset) {
+                    // Follow leader
+                    const tx = this.leader.x + this.offset.x;
+                    const ty = this.leader.y + this.offset.y;
+                    this.x += (tx - this.x) * 0.02;
+                    this.y += (ty - this.y) * 0.02;
+                    this.angle = this.leader.angle;
+                } else {
+                    // Drift slowly
+                    this.angle += (Math.random() - 0.5) * 0.003;
+                    this.x += Math.cos(this.angle) * this.speed;
+                    this.y += Math.sin(this.angle) * this.speed;
+
+                    // Keep within radar circle
+                    const dx = this.x - cx;
+                    const dy = this.y - cy;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (dist > maxR) {
+                        const angleToCenter = Math.atan2(cy - this.y, cx - this.x);
+                        this.angle = angleToCenter + (Math.random() - 0.5) * 0.5;
+                        this.x = cx + dx * (maxR / dist) * 0.95;
+                        this.y = cy + dy * (maxR / dist) * 0.95;
+                    }
+                }
+
+                // Detection fade
+                this.detected = Math.max(0, this.detected - 0.008);
+            }
+
+            draw() {
+                const col = this.team === 'friendly' ? '#0df' : '#f34';
+                const alpha = 0.2 + this.detected * 0.8;
+
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.angle);
+                ctx.globalAlpha = alpha;
+
+                ctx.beginPath();
+                if (this.type === 'capital') {
+                    ctx.moveTo(18, 0);
+                    ctx.lineTo(-12, 10);
+                    ctx.lineTo(-6, 0);
+                    ctx.lineTo(-12, -10);
+                } else if (this.type === 'cruiser') {
+                    ctx.moveTo(10, 0);
+                    ctx.lineTo(-6, 5);
+                    ctx.lineTo(-3, 0);
+                    ctx.lineTo(-6, -5);
+                } else {
+                    ctx.moveTo(4, 0);
+                    ctx.lineTo(-2, 2);
+                    ctx.lineTo(-2, -2);
+                }
+                ctx.closePath();
+                ctx.fillStyle = col;
+                ctx.globalAlpha = alpha * 0.3;
+                ctx.fill();
+                ctx.globalAlpha = alpha;
+                ctx.strokeStyle = col;
+                ctx.lineWidth = 1;
+                ctx.stroke();
+                ctx.restore();
+
+                // Label for big ships - smaller and more discreet
+                if (this.name && this.detected > 0.3) {
+                    ctx.globalAlpha = this.detected * 0.6;
+                    ctx.font = '8px IBM Plex Mono';
+                    ctx.fillStyle = col;
+                    ctx.fillText(this.name, this.x + this.size + 8, this.y + 3);
+                    ctx.globalAlpha = 1;
+                }
+            }
+        }
+
+        function initRadar() {
+            width = canvas.parentElement.clientWidth;
+            height = canvas.parentElement.clientHeight;
+            canvas.width = width;
+            canvas.height = height;
+
+            const cx = width / 2;
+            const cy = height / 2;
+            const r = Math.min(width, height) * 0.25;
+
+            ships.length = 0;
+
+            // Friendly fleet - left side of center
+            const vanguard = new Ship('capital', 'friendly', cx - r * 0.6, cy + r * 0.3);
+            ships.push(vanguard);
+            ships.push(new Ship('cruiser', 'friendly', cx - r * 0.8, cy));
+            ships.push(new Ship('cruiser', 'friendly', cx - r * 0.7, cy + r * 0.5));
+
+            // Alpha squadron
+            const alphaOffsets = [
+                {x: -25, y: -15}, {x: -25, y: 15},
+                {x: -45, y: -30}, {x: -45, y: 30},
+                {x: -65, y: -45}, {x: -65, y: 45}
+            ];
+            alphaOffsets.forEach(off => {
+                ships.push(new Ship('fighter', 'friendly', vanguard.x + off.x, vanguard.y + off.y, vanguard, off));
+            });
+
+            // Enemy fleet - right side of center
+            const nemesis = new Ship('capital', 'hostile', cx + r * 0.6, cy - r * 0.3);
+            ships.push(nemesis);
+            ships.push(new Ship('cruiser', 'hostile', cx + r * 0.8, cy - r * 0.1));
+            ships.push(new Ship('cruiser', 'hostile', cx + r * 0.7, cy - r * 0.5));
+
+            // Red squadron
+            const redOffsets = [
+                {x: 25, y: -12}, {x: 25, y: 12},
+                {x: 45, y: -25}, {x: 45, y: 25}, {x: 45, y: 0},
+                {x: 65, y: -38}, {x: 65, y: 38}, {x: 65, y: -12}, {x: 65, y: 12}
+            ];
+            redOffsets.forEach(off => {
+                ships.push(new Ship('fighter', 'hostile', nemesis.x + off.x, nemesis.y + off.y, nemesis, off));
+            });
+        }
+
+        function drawGrid() {
+            const cx = width / 2;
+            const cy = height / 2;
+            const maxR = Math.min(width, height) * 0.42; // Use min dimension for proper circle
+
+            ctx.strokeStyle = '#0a1520';
+            ctx.lineWidth = 1;
+            
+            for (let x = 0; x < width; x += 60) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, height);
+                ctx.stroke();
+            }
+            for (let y = 0; y < height; y += 60) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(width, y);
+                ctx.stroke();
+            }
+
+            // Range circles - proper circles using min dimension
+            ctx.strokeStyle = '#0c2030';
+            ctx.beginPath();
+            ctx.arc(cx, cy, maxR, 0, Math.PI * 2);
+            ctx.stroke();
+            
+            ctx.strokeStyle = '#081518';
+            ctx.beginPath();
+            ctx.arc(cx, cy, maxR * 0.66, 0, Math.PI * 2);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.arc(cx, cy, maxR * 0.33, 0, Math.PI * 2);
+            ctx.stroke();
+        }
+
+        function drawSweep() {
+            const cx = width / 2;
+            const cy = height / 2;
+            const maxR = Math.min(width, height) * 0.42;
+
+            scanAngle += 0.003;
+
+            ctx.beginPath();
+            ctx.moveTo(cx, cy);
+            ctx.arc(cx, cy, maxR, scanAngle, scanAngle + 0.4);
+            ctx.closePath();
+
+            const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, maxR);
+            grad.addColorStop(0, 'rgba(0, 180, 255, 0.15)');
+            grad.addColorStop(1, 'rgba(0, 180, 255, 0)');
+            ctx.fillStyle = grad;
+            ctx.fill();
+
+            // Detect ships in sweep
+            ships.forEach(ship => {
+                const dx = ship.x - cx;
+                const dy = ship.y - cy;
+                let a = Math.atan2(dy, dx);
+                if (a < 0) a += Math.PI * 2;
+                let sa = scanAngle % (Math.PI * 2);
+                if (sa < 0) sa += Math.PI * 2;
+                if (Math.abs(a - sa) < 0.4 || Math.abs(a - sa) > Math.PI * 2 - 0.4) {
+                    ship.detected = 1;
+                }
+            });
+        }
+
+        // Interference state
+        let interferenceLevel = 0;
+        let nextInterferenceTime = Date.now() + 3000;
+
+        function drawInterference() {
+            // Trigger new interference burst
+            if (Date.now() > nextInterferenceTime) {
+                interferenceLevel = 0.15 + Math.random() * 0.2;
+                nextInterferenceTime = Date.now() + 5000 + Math.random() * 10000;
+            }
+
+            if (interferenceLevel > 0) {
+                interferenceLevel *= 0.96;
+
+                // Horizontal distortion lines
+                const numLines = Math.floor(interferenceLevel * 6);
+                for (let i = 0; i < numLines; i++) {
+                    const y = Math.random() * height;
+                    ctx.fillStyle = `rgba(0, 200, 255, ${interferenceLevel * 0.3})`;
+                    ctx.fillRect(0, y, width, 1);
+                }
+
+                // Subtle noise
+                ctx.fillStyle = '#0cf';
+                for (let i = 0; i < interferenceLevel * 20; i++) {
+                    ctx.globalAlpha = interferenceLevel * Math.random() * 0.2;
+                    ctx.fillRect(Math.random() * width, Math.random() * height, 1, 1);
+                }
+                ctx.globalAlpha = 1;
+            }
+
+            // Constant subtle static - very light
+            if (Math.random() < 0.3) {
+                ctx.fillStyle = '#0cf';
+                ctx.globalAlpha = 0.03;
+                ctx.fillRect(Math.random() * width, Math.random() * height, 1, 1);
+                ctx.globalAlpha = 1;
+            }
+        }
+
+        function animate() {
+            ctx.fillStyle = 'rgba(0, 4, 5, 0.15)';
+            ctx.fillRect(0, 0, width, height);
+
+            drawGrid();
+            drawSweep();
+
+            ships.forEach(ship => {
+                ship.update();
+                ship.draw();
+            });
+
+            drawInterference();
+            updateContactCount();
+            requestAnimationFrame(animate);
+        }
+
+        window.addEventListener('resize', initRadar);
+        initRadar();
+        animate();
+    </script>
+</body>
+</html>

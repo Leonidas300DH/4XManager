@@ -9,6 +9,7 @@ import LogTab from './components/LogTab';
 import DashboardTab from './components/DashboardTab';
 import SettingsModal from './components/SettingsModal';
 import { ConfirmModal } from './components/ConfirmModal';
+import LandingPage from './components/LandingPage';
 import { INITIAL_TURN_DATA, DEFAULT_SETTINGS, type TurnData, type AppSettings } from './types';
 import { calculateTurns } from './utils/calculations';
 
@@ -17,6 +18,7 @@ function App() {
   const [currentTurnId, setCurrentTurnId] = useState<number>(1);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isNewGameConfirmOpen, setIsNewGameConfirmOpen] = useState(false);
+  const [showLanding, setShowLanding] = useState(true);
 
   const [settings, setSettings] = useState<AppSettings>(() => {
     const saved = localStorage.getItem('4x_app_settings');
@@ -282,6 +284,68 @@ function App() {
 
   const isReadOnly = currentTurnId < turns.length;
 
+  const hasSave = turns.length > 1 || turns[0]?.cp?.remaining !== INITIAL_TURN_DATA.cp.remaining || turns[0]?.planets?.length > 0;
+
+  if (showLanding) {
+    return (
+      <>
+        <LandingPage
+          onNewGame={handleNewGame}
+          onContinue={() => setShowLanding(false)}
+          onLoadGame={() => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = (e) => {
+              const file = (e.target as HTMLInputElement).files?.[0];
+              if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                  const content = e.target?.result as string;
+                  handleImportData(content);
+                  setShowLanding(false);
+                };
+                reader.readAsText(file);
+              }
+            };
+            input.click();
+          }}
+          onSettings={() => setIsSettingsOpen(true)}
+          onQuit={() => {
+            if (window.confirm('EXIT COMMAND CENTER?')) {
+              window.close();
+              alert('TERMINAL DISCONNECTING...');
+            }
+          }}
+          hasSave={hasSave}
+        />
+        <SettingsModal
+          isOpen={isSettingsOpen}
+          onClose={() => setIsSettingsOpen(false)}
+          settings={settings}
+          onUpdateSettings={setSettings}
+          onSaveGame={handleSaveGame}
+          onExportData={handleExportData}
+          onImportData={handleImportData}
+          onNewGame={handleNewGame}
+        />
+        <ConfirmModal
+          isOpen={isNewGameConfirmOpen}
+          title="COMMENCE NEW MISSION?"
+          message="WARNING: All current session data will be permanently purged. This action is IRREVERSIBLE."
+          confirmText="NEW MISSION"
+          cancelText="ABORT"
+          isDanger={true}
+          onConfirm={() => {
+            confirmNewGame();
+            setShowLanding(false);
+          }}
+          onCancel={() => setIsNewGameConfirmOpen(false)}
+        />
+      </>
+    );
+  }
+
   return (
     <div className="app-container">
       <header className="app-header">
@@ -527,7 +591,10 @@ function App() {
         confirmText="NEW MISSION"
         cancelText="ABORT"
         isDanger={true}
-        onConfirm={confirmNewGame}
+        onConfirm={() => {
+          confirmNewGame();
+          setShowLanding(false);
+        }}
         onCancel={() => setIsNewGameConfirmOpen(false)}
       />
 

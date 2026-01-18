@@ -1,0 +1,401 @@
+/* LandingPage.css - Space Empires 4X Command Screen */
+
+.landing-page {
+    --bg: #000608;
+    --blue: #0df;
+    --blue-dim: #0af;
+    --blue-dark: #079;
+    --blue-darker: #056;
+    --text: #0ff;
+    --text-dim: #09b;
+    --green: #0e8;
+    --red: #f34;
+    --orange: #f84;
+    --white: #bff;
+    --border: #068;
+
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    overflow: hidden;
+}
+
+/* LAYOUT */
+.landing-layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    grid-template-rows: 50px 1fr 30px;
+    height: 100vh;
+    gap: 1px;
+    background: var(--border);
+}
+
+/* HEADER */
+.landing-header {
+    grid-column: 1 / -1;
+    background: var(--bg);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    border-bottom: 1px solid var(--border);
+}
+
+.landing-header h1 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: 6px;
+    color: var(--white);
+    margin: 0;
+}
+
+.header-time {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 16px;
+    color: var(--text);
+}
+
+/* LEFT PANEL - MENU + COMMS */
+.panel-left {
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--border);
+    overflow: hidden;
+    min-height: 0;
+}
+
+.panel-header {
+    padding: 10px 15px;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--text);
+    border-bottom: 1px solid var(--border);
+    background: rgba(0, 30, 60, 0.5);
+    display: flex;
+    justify-content: space-between;
+    flex-shrink: 0;
+}
+
+.menu-section {
+    flex-shrink: 0;
+    flex-grow: 0;
+}
+
+.menu-btn {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 18px;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--blue-dark);
+    border-left: 2px solid transparent;
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 14px;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.menu-btn:hover:not(:disabled) {
+    background: rgba(0, 200, 255, 0.1);
+    color: var(--white);
+    border-left-color: var(--blue);
+}
+
+.menu-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.menu-btn.danger {
+    color: var(--red);
+}
+
+/* COMMS in left panel */
+.comms-section {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+    border-top: 1px solid var(--border);
+}
+
+.comms-feed {
+    flex: 1 1 0;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    padding: 8px 10px;
+    display: block;
+    min-height: 0;
+}
+
+.comms-feed::-webkit-scrollbar {
+    width: 3px;
+}
+
+.comms-feed::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.comms-feed::-webkit-scrollbar-thumb {
+    background: var(--blue-dark);
+}
+
+.comm-msg {
+    font-size: 9px;
+    line-height: 1.35;
+    animation: fadeIn 0.3s ease;
+    margin-bottom: 5px;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(3px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.comm-msg .time {
+    color: var(--blue-dark);
+    font-size: 7px;
+}
+
+.comm-msg .sender {
+    color: var(--blue);
+    font-size: 8px;
+}
+
+.comm-msg .text {
+    color: var(--text-dim);
+    margin-left: 4px;
+}
+
+.comm-msg.priority .sender {
+    color: var(--orange);
+}
+
+.comm-msg.priority .text {
+    color: var(--white);
+}
+
+.comm-msg.alert .sender {
+    color: var(--red);
+}
+
+.comm-msg.alert .text {
+    color: #fcc;
+}
+
+.comm-msg.system .sender {
+    color: var(--blue-dim);
+}
+
+.comm-msg.system .text {
+    color: var(--blue-dim);
+    font-style: italic;
+}
+
+/* CENTER - RADAR */
+.panel-center {
+    background: #000405;
+    position: relative;
+    overflow: hidden;
+}
+
+.radar-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* DATA OVERLAY - top left of radar */
+.data-overlay {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 8px;
+    color: var(--blue-dark);
+    pointer-events: none;
+    z-index: 20;
+    opacity: 0.6;
+    animation: overlayPulse 8s ease-in-out infinite;
+}
+
+@keyframes overlayPulse {
+
+    0%,
+    100% {
+        opacity: 0.5;
+    }
+
+    50% {
+        opacity: 0.7;
+    }
+}
+
+.data-block {
+    margin-bottom: 8px;
+    padding: 4px 8px;
+    background: rgba(0, 6, 8, 0.3);
+    border-left: 1px solid var(--blue-darker);
+}
+
+.data-label {
+    font-size: 7px;
+    color: var(--blue-darker);
+    letter-spacing: 1px;
+    margin-bottom: 2px;
+}
+
+.data-value {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 10px;
+    color: var(--blue-dark);
+    animation: dataFlicker 4s ease-in-out infinite;
+}
+
+@keyframes dataFlicker {
+
+    0%,
+    90%,
+    100% {
+        opacity: 1;
+    }
+
+    92% {
+        opacity: 0.7;
+    }
+
+    94% {
+        opacity: 1;
+    }
+
+    96% {
+        opacity: 0.8;
+    }
+}
+
+.data-value.small {
+    font-size: 9px;
+    color: var(--blue-darker);
+}
+
+.data-bar {
+    width: 50px;
+    height: 2px;
+    background: var(--blue-darker);
+    margin-top: 3px;
+}
+
+.data-bar-fill {
+    height: 100%;
+    background: var(--blue-dark);
+    transition: width 2s ease;
+}
+
+/* BOTTOM DATA OVERLAY */
+.data-overlay-bottom {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    font-size: 8px;
+    color: var(--blue-dark);
+    pointer-events: none;
+    z-index: 20;
+    opacity: 0.6;
+    text-align: right;
+    animation: overlayPulse 8s ease-in-out infinite;
+    animation-delay: -4s;
+}
+
+.data-overlay-bottom .data-block {
+    border-left: none;
+    border-right: 1px solid var(--blue-darker);
+    text-align: right;
+}
+
+/* INTERFERENCE OVERLAY */
+.interference {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 30;
+    opacity: 0;
+    transition: opacity 0.1s;
+}
+
+.interference.active {
+    opacity: 1;
+}
+
+.interference-line {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: rgba(0, 200, 255, 0.15);
+}
+
+/* FOOTER */
+.landing-footer {
+    grid-column: 1 / -1;
+    background: var(--bg);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 15px;
+    font-size: 9px;
+    color: var(--text-dim);
+    border-top: 1px solid var(--border);
+}
+
+/* OVERLAYS */
+.scanlines {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1100;
+    background: repeating-linear-gradient(0deg,
+            transparent 0px,
+            transparent 2px,
+            rgba(0, 10, 20, 0.08) 2px,
+            rgba(0, 10, 20, 0.08) 4px);
+}
+
+.vignette {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1099;
+    background: radial-gradient(ellipse at center, transparent 40%, var(--bg) 100%);
+}
+
+/* Live indicator */
+.live-indicator {
+    color: var(--green);
+}
