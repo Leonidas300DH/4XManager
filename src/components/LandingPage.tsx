@@ -132,25 +132,42 @@ const LandingPage: React.FC<LandingPageProps> = ({
                 const maxR = Math.min(width, height) * 0.35;
 
                 if (this.leader && this.offset) {
+                    // Squadron member - follow leader with offset
                     const tx = this.leader.x + this.offset.x;
                     const ty = this.leader.y + this.offset.y;
-                    this.x += (tx - this.x) * 0.02;
-                    this.y += (ty - this.y) * 0.02;
+                    this.x += (tx - this.x) * 0.08; // Faster follow for tighter formation
+                    this.y += (ty - this.y) * 0.08;
                     this.angle = this.leader.angle;
                 } else {
-                    this.angle += (Math.random() - 0.5) * 0.003;
-                    this.x += Math.cos(this.angle) * this.speed;
-                    this.y += Math.sin(this.angle) * this.speed;
+                    // Independent ship - wander with smooth edge avoidance
+                    this.angle += (Math.random() - 0.5) * 0.01;
 
                     const dx = this.x - cx;
                     const dy = this.y - cy;
                     const dist = Math.sqrt(dx * dx + dy * dy);
 
-                    if (dist > maxR) {
+                    // Smooth turn when approaching edge (start turning at 80% of maxR)
+                    if (dist > maxR * 0.8) {
                         const angleToCenter = Math.atan2(cy - this.y, cx - this.x);
-                        this.angle = angleToCenter + (Math.random() - 0.5) * 0.5;
-                        this.x = cx + dx * (maxR / dist) * 0.95;
-                        this.y = cy + dy * (maxR / dist) * 0.95;
+                        // Gradually blend towards center - stronger as we get closer to edge
+                        const edgeFactor = (dist - maxR * 0.8) / (maxR * 0.2);
+                        const turnStrength = Math.min(edgeFactor * 0.05, 0.1);
+
+                        // Smooth angle interpolation
+                        let angleDiff = angleToCenter - this.angle;
+                        while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+                        while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+                        this.angle += angleDiff * turnStrength;
+                    }
+
+                    // Apply movement
+                    this.x += Math.cos(this.angle) * this.speed;
+                    this.y += Math.sin(this.angle) * this.speed;
+
+                    // Hard boundary (should rarely hit due to smooth turning)
+                    if (dist > maxR) {
+                        this.x = cx + dx * (maxR / dist) * 0.98;
+                        this.y = cy + dy * (maxR / dist) * 0.98;
                     }
                 }
                 this.detected = Math.max(0, this.detected - 0.008);
@@ -233,23 +250,23 @@ const LandingPage: React.FC<LandingPageProps> = ({
             ships.push(new Ship('cruiser', 'friendly', cx - r * 0.9, cy + r * 0.2));
             ships.push(new Ship('cruiser', 'friendly', cx - r * 0.5, cy + r * 0.7));
 
-            // Fighters - now independent (no leader) so they show speed difference
-            const friendlyFighterPositions = [
-                { x: cx - r * 0.4, y: cy + r * 0.1 },
-                { x: cx - r * 0.5, y: cy + r * 0.2 },
-                { x: cx - r * 0.3, y: cy + r * 0.4 },
-                { x: cx - r * 0.6, y: cy + r * 0.5 },
-                { x: cx - r * 0.7, y: cy + r * 0.3 },
-                { x: cx - r * 0.8, y: cy + r * 0.4 },
-                { x: cx - r * 0.4, y: cy + r * 0.6 },
-                { x: cx - r * 0.2, y: cy + r * 0.3 },
-                { x: cx - r * 0.6, y: cy + r * 0.1 },
-                { x: cx - r * 0.8, y: cy + r * 0.6 },
-                { x: cx - r * 0.3, y: cy + r * 0.2 },
-                { x: cx - r * 0.5, y: cy + r * 0.4 },
+            // Fighter Squadrons (groups of 3: 1 leader + 2 wingmen)
+            const wingOffsets = [
+                { x: -12, y: -8 },
+                { x: -12, y: 8 },
             ];
-            friendlyFighterPositions.forEach(pos => {
-                ships.push(new Ship('fighter', 'friendly', pos.x, pos.y));
+            const friendlySquadronLeaders = [
+                { x: cx - r * 0.4, y: cy + r * 0.2 },
+                { x: cx - r * 0.6, y: cy + r * 0.5 },
+                { x: cx - r * 0.3, y: cy + r * 0.4 },
+                { x: cx - r * 0.7, y: cy + r * 0.3 },
+            ];
+            friendlySquadronLeaders.forEach(pos => {
+                const leader = new Ship('fighter', 'friendly', pos.x, pos.y);
+                ships.push(leader);
+                wingOffsets.forEach(off => {
+                    ships.push(new Ship('fighter', 'friendly', pos.x + off.x, pos.y + off.y, leader, off));
+                });
             });
 
             // HOSTILE FLEET - Double ships
@@ -264,29 +281,21 @@ const LandingPage: React.FC<LandingPageProps> = ({
             ships.push(new Ship('cruiser', 'hostile', cx + r * 0.9, cy - r * 0.2));
             ships.push(new Ship('cruiser', 'hostile', cx + r * 0.5, cy - r * 0.7));
 
-            // Fighters - independent
-            const hostileFighterPositions = [
-                { x: cx + r * 0.4, y: cy - r * 0.1 },
-                { x: cx + r * 0.5, y: cy - r * 0.2 },
-                { x: cx + r * 0.3, y: cy - r * 0.4 },
+            // Hostile Fighter Squadrons (groups of 3)
+            const hostileSquadronLeaders = [
+                { x: cx + r * 0.4, y: cy - r * 0.2 },
                 { x: cx + r * 0.6, y: cy - r * 0.5 },
+                { x: cx + r * 0.3, y: cy - r * 0.4 },
                 { x: cx + r * 0.7, y: cy - r * 0.3 },
-                { x: cx + r * 0.8, y: cy - r * 0.4 },
-                { x: cx + r * 0.4, y: cy - r * 0.6 },
-                { x: cx + r * 0.2, y: cy - r * 0.3 },
-                { x: cx + r * 0.6, y: cy - r * 0.1 },
-                { x: cx + r * 0.8, y: cy - r * 0.6 },
-                { x: cx + r * 0.3, y: cy - r * 0.2 },
-                { x: cx + r * 0.5, y: cy - r * 0.4 },
-                { x: cx + r * 0.7, y: cy - r * 0.1 },
-                { x: cx + r * 0.4, y: cy - r * 0.5 },
-                { x: cx + r * 0.6, y: cy - r * 0.7 },
-                { x: cx + r * 0.2, y: cy - r * 0.4 },
                 { x: cx + r * 0.5, y: cy - r * 0.6 },
-                { x: cx + r * 0.3, y: cy - r * 0.3 },
+                { x: cx + r * 0.2, y: cy - r * 0.3 },
             ];
-            hostileFighterPositions.forEach(pos => {
-                ships.push(new Ship('fighter', 'hostile', pos.x, pos.y));
+            hostileSquadronLeaders.forEach(pos => {
+                const leader = new Ship('fighter', 'hostile', pos.x, pos.y);
+                ships.push(leader);
+                wingOffsets.forEach(off => {
+                    ships.push(new Ship('fighter', 'hostile', pos.x + off.x, pos.y + off.y, leader, off));
+                });
             });
         };
 
