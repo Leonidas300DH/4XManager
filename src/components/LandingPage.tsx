@@ -597,7 +597,6 @@ const LandingPage: React.FC<LandingPageProps> = ({
     return (
         <div className="landing-page">
             <div className="scanlines"></div>
-            <div className="vignette"></div>
 
             <div className="landing-layout">
                 {/* HEADER */}
