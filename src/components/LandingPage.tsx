@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './LandingPage.css';
+import HudOverlay from './HudOverlay';
 
 interface LandingPageProps {
     onNewGame: () => void;
@@ -632,7 +633,9 @@ const LandingPage: React.FC<LandingPageProps> = ({
 
                 {/* CENTER - RADAR */}
                 <main className="panel-center">
-                    <canvas className="radar-canvas" ref={canvasRef}></canvas>
+                    <HudOverlay enabled={true}>
+                        <canvas className="radar-canvas" ref={canvasRef}></canvas>
+                    </HudOverlay>
 
                     <div className="data-overlay">
                         <div className="data-block">
