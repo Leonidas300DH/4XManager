@@ -143,12 +143,14 @@ const LandingPage: React.FC<LandingPageProps> = ({
                 } else {
                     // Independent ship - dogfight behavior with straight-run phases
 
-                    // Update straight run timer (120-180 frames = 2-3 sec at 60fps)
+                    // Update straight run timer - big ships have longer straight phases
                     this.straightRunTimer--;
                     const isStraightRun = this.straightRunTimer > 0;
-                    if (this.straightRunTimer <= -120) {
+                    const straightDuration = this.type === 'fighter' ? 120 : (this.type === 'capital' ? 300 : 240);
+                    const maneuverDuration = this.type === 'fighter' ? 120 : (this.type === 'capital' ? 60 : 80);
+                    if (this.straightRunTimer <= -maneuverDuration) {
                         // Start new straight run phase
-                        this.straightRunTimer = 120 + Math.random() * 60;
+                        this.straightRunTimer = straightDuration + Math.random() * 60;
                     }
 
                     if (!isStraightRun) {
@@ -167,8 +169,9 @@ const LandingPage: React.FC<LandingPageProps> = ({
                             }
                         });
 
-                        // Smooth random wandering
-                        this.angle += (Math.random() - 0.5) * 0.015;
+                        // Smooth random wandering - less for big ships
+                        const wanderRate = this.type === 'fighter' ? 0.015 : (this.type === 'capital' ? 0.002 : 0.005);
+                        this.angle += (Math.random() - 0.5) * wanderRate;
 
                         // Engage enemy if nearby
                         if (nearestEnemy) {
@@ -178,8 +181,8 @@ const LandingPage: React.FC<LandingPageProps> = ({
                             while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
                             while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
 
-                            // Fighters aggressive, capitals very slow, cruisers medium
-                            const aggression = this.type === 'fighter' ? 0.03 : (this.type === 'capital' ? 0.003 : 0.008);
+                            // Fighters aggressive, capitals extremely slow (inertia), cruisers slow
+                            const aggression = this.type === 'fighter' ? 0.03 : (this.type === 'capital' ? 0.001 : 0.004);
                             this.angle += angleDiff * aggression;
 
                             if (nearestDist < 60) {
