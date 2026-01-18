@@ -350,7 +350,7 @@ const LandingPage: React.FC<LandingPageProps> = ({
         };
 
         const animate = () => {
-            ctx.fillStyle = 'rgba(0, 4, 5, 0.15)';
+            ctx.fillStyle = 'rgba(0, 4, 5, 0.03)'; // Very transparent to let background show
             ctx.fillRect(0, 0, width, height);
 
             drawGrid();
