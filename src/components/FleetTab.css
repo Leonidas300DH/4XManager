@@ -235,7 +235,7 @@
 }
 
 .count-input {
-    width: 45px;
+    width: 55px;
     background: rgba(0, 0, 0, 0.3);
     border: 1px solid var(--border-color);
     color: var(--text-color);
@@ -243,6 +243,71 @@
     border-radius: 4px;
     text-align: center;
     font-size: 0.85rem;
+    /* Hide native spinner arrows */
+    -moz-appearance: textfield;
+}
+
+.count-input::-webkit-outer-spin-button,
+.count-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Fleet Input Wrapper with +/- Buttons */
+.fleet-input-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    position: relative;
+}
+
+.fleet-adj-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.fleet-adj-btn {
+    width: 18px;
+    height: 13px;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.65rem;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+}
+
+.fleet-adj-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.fleet-adj-plus {
+    border-radius: 3px 3px 0 0;
+}
+
+.fleet-adj-minus {
+    border-radius: 0 0 3px 3px;
+}
+
+/* Adjust button colors */
+.fleet-input-wrapper:has(.adjust-input) .fleet-adj-btn:hover {
+    border-color: #ff9800;
+    color: #ff9800;
+}
+
+/* Purchase button colors */
+.fleet-input-wrapper:has(.purchase-input) .fleet-adj-btn:hover {
+    border-color: #4caf50;
+    color: #4caf50;
 }
 
 .purchase-input {

@@ -798,23 +798,39 @@ export const FleetTab: React.FC<FleetTabProps> = ({ currentTurn, onUpdate, turnI
                                                     <td>#{groupId}</td>
                                                     <td className="fixed-value">{prevCountValue}</td>
                                                     <td>
-                                                        <input
-                                                            type="number"
-                                                            className="count-input adjust-input"
-                                                            value={group.adjust || 0}
-                                                            disabled={readOnly}
-                                                            onChange={(e) => handleGroupUpdate(ship.acronym, groupId, 'adjust', parseInt(e.target.value) || 0)}
-                                                        />
+                                                        <div className="fleet-input-wrapper">
+                                                            <input
+                                                                type="number"
+                                                                className="count-input adjust-input"
+                                                                value={group.adjust || 0}
+                                                                disabled={readOnly}
+                                                                onChange={(e) => handleGroupUpdate(ship.acronym, groupId, 'adjust', parseInt(e.target.value) || 0)}
+                                                            />
+                                                            {!readOnly && (
+                                                                <div className="fleet-adj-buttons">
+                                                                    <button className="fleet-adj-btn fleet-adj-plus" onClick={() => handleGroupUpdate(ship.acronym, groupId, 'adjust', (group.adjust || 0) + 1)}>+</button>
+                                                                    <button className="fleet-adj-btn fleet-adj-minus" onClick={() => handleGroupUpdate(ship.acronym, groupId, 'adjust', (group.adjust || 0) - 1)}>−</button>
+                                                                </div>
+                                                            )}
+                                                        </div>
                                                     </td>
                                                     <td>
-                                                        <input
-                                                            type="number"
-                                                            className={`count-input purchase-input ${isLocked ? 'locked' : ''}`}
-                                                            value={group.purchase || 0}
-                                                            disabled={isLocked || readOnly}
-                                                            onChange={(e) => handleGroupUpdate(ship.acronym, groupId, 'purchase', parseInt(e.target.value) || 0)}
-                                                            min="0"
-                                                        />
+                                                        <div className="fleet-input-wrapper">
+                                                            <input
+                                                                type="number"
+                                                                className={`count-input purchase-input ${isLocked ? 'locked' : ''}`}
+                                                                value={group.purchase || 0}
+                                                                disabled={isLocked || readOnly}
+                                                                onChange={(e) => handleGroupUpdate(ship.acronym, groupId, 'purchase', parseInt(e.target.value) || 0)}
+                                                                min="0"
+                                                            />
+                                                            {!isLocked && !readOnly && (
+                                                                <div className="fleet-adj-buttons">
+                                                                    <button className="fleet-adj-btn fleet-adj-plus" onClick={() => handleGroupUpdate(ship.acronym, groupId, 'purchase', (group.purchase || 0) + 1)}>+</button>
+                                                                    <button className="fleet-adj-btn fleet-adj-minus" onClick={() => handleGroupUpdate(ship.acronym, groupId, 'purchase', Math.max(0, (group.purchase || 0) - 1))}>−</button>
+                                                                </div>
+                                                            )}
+                                                        </div>
                                                     </td>
                                                     <td className="total-count-cell">
                                                         <span className="total-count-value">
