@@ -350,8 +350,8 @@ const LandingPage: React.FC<LandingPageProps> = ({
         };
 
         const animate = () => {
-            ctx.fillStyle = 'rgba(0, 4, 5, 0.03)'; // Very transparent to let background show
-            ctx.fillRect(0, 0, width, height);
+            // Clear canvas to transparent so background image shows through
+            ctx.clearRect(0, 0, width, height);
 
             drawGrid();
             drawSweep();
