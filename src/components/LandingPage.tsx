@@ -587,7 +587,9 @@ const LandingPage: React.FC<LandingPageProps> = ({
             const msg = chatter[chatterIndex % chatter.length];
             addComm(msg.sender, msg.text, msg.type);
             chatterIndex++;
-            setTimeout(startChatter, 600 + Math.random() * 600); // Faster messages
+            // 30% faster with random delay between 400-900ms
+            const baseDelay = 400 + Math.random() * 500;
+            setTimeout(startChatter, baseDelay);
         };
 
         playScript();
