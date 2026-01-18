@@ -188,6 +188,18 @@
   margin-left: 2rem;
   display: flex;
   gap: 1rem;
+  overflow-x: auto;
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE/Edge */
+}
+
+.app-tabs::-webkit-scrollbar {
+  display: none;
+  /* Chrome/Safari */
 }
 
 .tab-button {
@@ -203,6 +215,8 @@
   border-bottom: 2px solid transparent;
   display: flex;
   align-items: center;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .tab-icon {
