@@ -351,7 +351,7 @@ function App() {
       <header className="app-header">
         <div className="header-top-row">
           <div className="header-logo-group">
-            <h1>Space Empires 4x</h1>
+            <h1 onClick={() => setShowLanding(true)} style={{ cursor: 'pointer' }} title="Return to Home">Space Empires 4x</h1>
             <div className="header-actions">
               <button className="icon-btn" title="Open Systems Menu" onClick={() => setIsSettingsOpen(true)}>⚙️</button>
             </div>
