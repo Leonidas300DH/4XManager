@@ -302,6 +302,21 @@
   gap: 20px;
 }
 
+.header-logo-group h1 {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 400;
+  font-size: 22px;
+  letter-spacing: 8px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0;
+  transition: color 0.2s ease;
+}
+
+.header-logo-group h1:hover {
+  color: var(--accent-color);
+}
+
 .hud-toggle {
   display: flex;
   align-items: center;
