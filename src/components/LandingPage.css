@@ -62,6 +62,24 @@
     color: var(--text);
 }
 
+.sound-toggle {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--cyan);
+    padding: 6px 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    border-radius: 3px;
+}
+
+.sound-toggle:hover {
+    background: rgba(0, 221, 255, 0.1);
+    border-color: var(--cyan);
+}
+
 /* LEFT PANEL - MENU + COMMS */
 .panel-left {
     background: var(--bg);

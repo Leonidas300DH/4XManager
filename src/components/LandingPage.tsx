@@ -27,6 +27,7 @@ const LandingPage: React.FC<LandingPageProps> = ({
     const [bearing, setBearing] = useState(47);
     const [signalWidth, setSignalWidth] = useState(80);
     const [contacts, setContacts] = useState({ friendly: 0, hostile: 0 });
+    const [isMuted, setIsMuted] = useState(true); // Default muted
 
     // ══════════════════════════════════════════════════════════════
     // CLOCK & DATA UPDATES
@@ -56,20 +57,24 @@ const LandingPage: React.FC<LandingPageProps> = ({
     }, []);
 
     // ══════════════════════════════════════════════════════════════
-    // MUSIC - Using ref to control HTML audio element
+    // MUSIC - Controlled by mute state
     // ══════════════════════════════════════════════════════════════
-    useEffect(() => {
+    const toggleMute = () => {
         if (audioRef.current) {
-            audioRef.current.volume = 0.2; // 20% volume
-            // Attempt to play on mount (autoPlay should handle this, but as backup)
-            audioRef.current.play().catch(() => {
-                // Autoplay blocked - add click listener as fallback
-                const tryPlay = () => {
-                    audioRef.current?.play();
-                    document.removeEventListener('click', tryPlay);
-                };
-                document.addEventListener('click', tryPlay);
-            });
+            if (isMuted) {
+                audioRef.current.volume = 0.2;
+                audioRef.current.play().catch(() => { });
+            } else {
+                audioRef.current.pause();
+            }
+            setIsMuted(!isMuted);
+        }
+    };
+
+    useEffect(() => {
+        // Audio stays paused until user clicks sound button
+        if (audioRef.current) {
+            audioRef.current.volume = 0.2;
         }
         return () => {
             if (audioRef.current) {
@@ -612,7 +617,28 @@ const LandingPage: React.FC<LandingPageProps> = ({
                 {/* HEADER */}
                 <header className="landing-header">
                     <h1>SPACE EMPIRES 4X</h1>
-                    <div className="header-time">{clock}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                        <button
+                            onClick={toggleMute}
+                            className="sound-toggle"
+                            title={isMuted ? 'Enable Sound' : 'Mute Sound'}
+                        >
+                            {isMuted ? (
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                                    <line x1="23" y1="9" x2="17" y2="15" />
+                                    <line x1="17" y1="9" x2="23" y2="15" />
+                                </svg>
+                            ) : (
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                                    <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+                                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+                                </svg>
+                            )}
+                        </button>
+                        <div className="header-time">{clock}</div>
+                    </div>
                 </header>
 
                 {/* LEFT - MENU + COMMS */}
