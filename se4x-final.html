@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Space Empires 4X - Command</title>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&family=Rajdhani:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
     <style>
         :root {
             --bg: #000608;
@@ -21,7 +24,11 @@
             --border: #068;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
         body {
             background: var(--bg);
@@ -118,10 +125,12 @@
 
         /* COMMS in left panel - FIXED */
         .comms-section {
-            flex: 1 1 0; /* Take remaining space but can shrink */
+            flex: 1 1 0;
+            /* Take remaining space but can shrink */
             display: flex;
             flex-direction: column;
-            min-height: 0; /* Critical for overflow */
+            min-height: 0;
+            /* Critical for overflow */
             overflow: hidden;
             border-top: 1px solid var(--border);
         }
@@ -131,13 +140,22 @@
             overflow-y: scroll;
             overflow-x: hidden;
             padding: 8px 10px;
-            display: block; /* Changed from flex to block */
+            display: block;
+            /* Changed from flex to block */
             min-height: 0;
         }
 
-        .comms-feed::-webkit-scrollbar { width: 3px; }
-        .comms-feed::-webkit-scrollbar-track { background: transparent; }
-        .comms-feed::-webkit-scrollbar-thumb { background: var(--blue-dark); }
+        .comms-feed::-webkit-scrollbar {
+            width: 3px;
+        }
+
+        .comms-feed::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .comms-feed::-webkit-scrollbar-thumb {
+            background: var(--blue-dark);
+        }
 
         .comm-msg {
             font-size: 9px;
@@ -147,20 +165,56 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(3px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(3px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
-        .comm-msg .time { color: var(--blue-dark); font-size: 7px; }
-        .comm-msg .sender { color: var(--blue); font-size: 8px; }
-        .comm-msg .text { color: var(--text-dim); margin-left: 4px; }
+        .comm-msg .time {
+            color: var(--blue-dark);
+            font-size: 7px;
+        }
 
-        .comm-msg.priority .sender { color: var(--orange); }
-        .comm-msg.priority .text { color: var(--white); }
-        .comm-msg.alert .sender { color: var(--red); }
-        .comm-msg.alert .text { color: #fcc; }
-        .comm-msg.system .sender { color: var(--blue-dim); }
-        .comm-msg.system .text { color: var(--blue-dim); font-style: italic; }
+        .comm-msg .sender {
+            color: var(--blue);
+            font-size: 8px;
+        }
+
+        .comm-msg .text {
+            color: var(--text-dim);
+            margin-left: 4px;
+        }
+
+        .comm-msg.priority .sender {
+            color: var(--orange);
+        }
+
+        .comm-msg.priority .text {
+            color: var(--white);
+        }
+
+        .comm-msg.alert .sender {
+            color: var(--red);
+        }
+
+        .comm-msg.alert .text {
+            color: #fcc;
+        }
+
+        .comm-msg.system .sender {
+            color: var(--blue-dim);
+        }
+
+        .comm-msg.system .text {
+            color: var(--blue-dim);
+            font-style: italic;
+        }
 
         /* CENTER - RADAR */
         .panel-center {
@@ -189,8 +243,15 @@
         }
 
         @keyframes overlayPulse {
-            0%, 100% { opacity: 0.5; }
-            50% { opacity: 0.7; }
+
+            0%,
+            100% {
+                opacity: 0.5;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
         }
 
         .data-block {
@@ -215,10 +276,24 @@
         }
 
         @keyframes dataFlicker {
-            0%, 90%, 100% { opacity: 1; }
-            92% { opacity: 0.7; }
-            94% { opacity: 1; }
-            96% { opacity: 0.8; }
+
+            0%,
+            90%,
+            100% {
+                opacity: 1;
+            }
+
+            92% {
+                opacity: 0.7;
+            }
+
+            94% {
+                opacity: 1;
+            }
+
+            96% {
+                opacity: 0.8;
+            }
         }
 
         .data-value.small {
@@ -263,8 +338,10 @@
         /* INTERFERENCE OVERLAY */
         .interference {
             position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             pointer-events: none;
             z-index: 30;
             opacity: 0;
@@ -299,29 +376,32 @@
         /* OVERLAYS */
         .scanlines {
             position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             pointer-events: none;
             z-index: 100;
-            background: repeating-linear-gradient(
-                0deg,
-                transparent 0px,
-                transparent 2px,
-                rgba(0, 10, 20, 0.08) 2px,
-                rgba(0, 10, 20, 0.08) 4px
-            );
+            background: repeating-linear-gradient(0deg,
+                    transparent 0px,
+                    transparent 2px,
+                    rgba(0, 10, 20, 0.08) 2px,
+                    rgba(0, 10, 20, 0.08) 4px);
         }
 
         .vignette {
             position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             pointer-events: none;
             z-index: 99;
             background: radial-gradient(ellipse at center, transparent 40%, var(--bg) 100%);
         }
     </style>
 </head>
+
 <body>
     <div class="scanlines"></div>
     <div class="vignette"></div>
@@ -355,7 +435,7 @@
         <!-- CENTER - RADAR -->
         <main class="panel-center">
             <canvas id="radarCanvas"></canvas>
-            
+
             <!-- DATA OVERLAY TOP LEFT - discreet -->
             <div class="data-overlay" id="dataOverlayTop">
                 <div class="data-block">
@@ -368,7 +448,9 @@
                 </div>
                 <div class="data-block">
                     <div class="data-label">SIGNAL</div>
-                    <div class="data-bar"><div class="data-bar-fill" id="signalBar" style="width:80%"></div></div>
+                    <div class="data-bar">
+                        <div class="data-bar-fill" id="signalBar" style="width:80%"></div>
+                    </div>
                 </div>
             </div>
 
@@ -454,7 +536,7 @@
             // Create random interference lines
             interferenceEl.innerHTML = '';
             const numLines = 2 + Math.floor(Math.random() * 4);
-            
+
             for (let i = 0; i < numLines; i++) {
                 const line = document.createElement('div');
                 line.className = 'interference-line';
@@ -465,7 +547,7 @@
             }
 
             interferenceEl.classList.add('active');
-            
+
             setTimeout(() => {
                 interferenceEl.classList.remove('active');
             }, 100 + Math.random() * 150);
@@ -652,7 +734,7 @@
                 this.leader = leader;
                 this.offset = offset;
                 this.detected = 0;
-                
+
                 if (type === 'capital') {
                     this.size = 18;
                     this.speed = 0.015;
@@ -688,7 +770,7 @@
                     const dx = this.x - cx;
                     const dy = this.y - cy;
                     const dist = Math.sqrt(dx * dx + dy * dy);
-                    
+
                     if (dist > maxR) {
                         const angleToCenter = Math.atan2(cy - this.y, cx - this.x);
                         this.angle = angleToCenter + (Math.random() - 0.5) * 0.5;
@@ -767,9 +849,9 @@
 
             // Alpha squadron
             const alphaOffsets = [
-                {x: -25, y: -15}, {x: -25, y: 15},
-                {x: -45, y: -30}, {x: -45, y: 30},
-                {x: -65, y: -45}, {x: -65, y: 45}
+                { x: -25, y: -15 }, { x: -25, y: 15 },
+                { x: -45, y: -30 }, { x: -45, y: 30 },
+                { x: -65, y: -45 }, { x: -65, y: 45 }
             ];
             alphaOffsets.forEach(off => {
                 ships.push(new Ship('fighter', 'friendly', vanguard.x + off.x, vanguard.y + off.y, vanguard, off));
@@ -783,9 +865,9 @@
 
             // Red squadron
             const redOffsets = [
-                {x: 25, y: -12}, {x: 25, y: 12},
-                {x: 45, y: -25}, {x: 45, y: 25}, {x: 45, y: 0},
-                {x: 65, y: -38}, {x: 65, y: 38}, {x: 65, y: -12}, {x: 65, y: 12}
+                { x: 25, y: -12 }, { x: 25, y: 12 },
+                { x: 45, y: -25 }, { x: 45, y: 25 }, { x: 45, y: 0 },
+                { x: 65, y: -38 }, { x: 65, y: 38 }, { x: 65, y: -12 }, { x: 65, y: 12 }
             ];
             redOffsets.forEach(off => {
                 ships.push(new Ship('fighter', 'hostile', nemesis.x + off.x, nemesis.y + off.y, nemesis, off));
@@ -799,7 +881,7 @@
 
             ctx.strokeStyle = '#0a1520';
             ctx.lineWidth = 1;
-            
+
             for (let x = 0; x < width; x += 60) {
                 ctx.beginPath();
                 ctx.moveTo(x, 0);
@@ -818,12 +900,12 @@
             ctx.beginPath();
             ctx.arc(cx, cy, maxR, 0, Math.PI * 2);
             ctx.stroke();
-            
+
             ctx.strokeStyle = '#081518';
             ctx.beginPath();
             ctx.arc(cx, cy, maxR * 0.66, 0, Math.PI * 2);
             ctx.stroke();
-            
+
             ctx.beginPath();
             ctx.arc(cx, cy, maxR * 0.33, 0, Math.PI * 2);
             ctx.stroke();
@@ -923,4 +1005,5 @@
         animate();
     </script>
 </body>
+
 </html>
